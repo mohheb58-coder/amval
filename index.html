@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>سیستم مدیریت اموال — دبستان شهید نیاسری ۱</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tahoma,Arial,sans-serif;direction:rtl;background:#f0f4f8;color:#222;font-size:14px;overflow-x:hidden}
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a5c,#4361ee)}
+.login-box{background:#fff;border-radius:18px;padding:36px 32px;width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.login-box h2{font-size:18px;color:#1a3a5c;margin-bottom:4px}
+.login-box p{font-size:12px;color:#999;margin-bottom:24px}
+.login-box input{width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid #ddd;font-size:15px;text-align:center;letter-spacing:6px;margin-bottom:14px;font-family:monospace}
+.login-box input:focus{outline:none;border-color:#4361ee;box-shadow:0 0 0 3px rgba(67,97,238,.1)}
+.login-box button{width:100%;padding:12px;border-radius:8px;background:linear-gradient(135deg,#1a3a5c,#4361ee);color:#fff;border:none;font-size:14px;cursor:pointer;font-family:Tahoma}
+.login-box button:hover{opacity:.9}
+.login-err{color:#e53935;font-size:12px;margin-top:8px;min-height:18px}
+/* MAIN */
+#main-app{display:none}
+.header{background:linear-gradient(135deg,#1a3a5c,#2d5a8e);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:15px;font-weight:bold}
+.header p{font-size:11px;opacity:.8;margin-top:2px}
+.header-actions{display:flex;gap:8px;align-items:center}
+.header-actions button{padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:12px;font-family:Tahoma}
+.nav{background:#fff;border-bottom:2px solid #e8eef6;padding:0 20px;display:flex;gap:2px}
+.nav-btn{padding:10px 16px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;color:#666;font-family:Tahoma,Arial;transition:all .15s}
+.nav-btn.active{color:#4361ee;border-bottom-color:#4361ee;font-weight:bold}
+.nav-btn:hover:not(.active){background:#f5f8ff;color:#4361ee}
+.main{padding:16px;overflow-x:hidden;max-width:100%}
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:14px}
+.stat-card{border-radius:12px;padding:14px;text-align:center;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.stat-card .num{font-size:26px;font-weight:bold}
+.stat-card .lbl{font-size:10px;opacity:.88;margin-top:3px}
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;background:#fff;padding:10px 12px;border-radius:10px;border:1px solid #e8eef6}
+.toolbar input,.toolbar select{padding:8px 12px;border-radius:7px;border:1.5px solid #e0e8f0;font-size:13px;font-family:Tahoma,Arial;background:#f7fafd;color:#222;transition:border .2s}
+.toolbar input:focus,.toolbar select:focus{outline:none;border-color:#4361ee;background:#fff}
+.toolbar input{min-width:200px}
+/* BUTTONS */
+button{padding:7px 14px;border-radius:7px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:13px;font-family:Tahoma,Arial,sans-serif;color:#333;transition:all .15s}
+button:hover{filter:brightness(.95)}
+.btn-blue{background:linear-gradient(135deg,#4361ee,#3a0ca3);color:#fff;border:none}
+.btn-green{background:linear-gradient(135deg,#06d6a0,#1b9aaa);color:#fff;border:none}
+.btn-orange{background:linear-gradient(135deg,#f8961e,#f3722c);color:#fff;border:none}
+.btn-purple{background:linear-gradient(135deg,#7209b7,#560bad);color:#fff;border:none}
+.btn-red{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;border:none}
+.btn-teal{background:linear-gradient(135deg,#2d6a4f,#40916c);color:#fff;border:none}
+/* TABLE */
+.table-wrap{overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 280px);border-radius:10px;border:1px solid #e0e8f0;box-shadow:0 2px 8px rgba(0,0,0,.05);width:100%}
+.table-wrap thead th{position:sticky;top:0;z-index:2;background:linear-gradient(135deg,#f0f4ff,#e8eef8)}
+table{width:100%;border-collapse:collapse;font-size:11px;background:#fff;table-layout:fixed}
+thead tr{background:linear-gradient(135deg,#f0f4ff,#e8eef8)}
+th{padding:8px 6px;text-align:right;font-weight:bold;color:#1a3a5c;border-bottom:2px solid #d0d8f0;white-space:normal;cursor:pointer;user-select:none;transition:background .15s;overflow:hidden;font-size:10px;line-height:1.3}
+th:hover{background:#dce4f8}
+td{padding:6px 6px;border-bottom:1px solid #f0f4f8;color:#333;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;word-break:break-word;font-size:11px}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:#fafbfe}
+tr:hover td{background:#eff3ff!important}
+.badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:bold}
+.badge-g{background:#e0f7ee;color:#1b7a4a}
+.badge-b{background:#e3edff;color:#1a3a8c}
+.badge-o{background:#fff3e0;color:#b84d00}
+.badge-r{background:#ffeaea;color:#b71c1c}
+.badge-p{background:#f3e5f5;color:#6a0080}
+/* FORM */
+.form-card{background:#fff;border-radius:14px;padding:24px;max-width:640px;box-shadow:0 4px 20px rgba(67,97,238,.1);border:1px solid #e8eef6}
+.form-section{background:#f7fafd;border-radius:10px;padding:14px 16px;margin-bottom:14px;border:1px solid #e0ecf8}
+.form-section-title{font-size:11px;font-weight:bold;color:#4361ee;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:12px;color:#1a3a5c;margin-bottom:5px;font-weight:bold}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px 13px;border-radius:8px;border:1.5px solid #e0e8f0;font-size:13px;font-family:Tahoma,Arial;background:#f7fafd;color:#222;transition:all .2s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:#4361ee;background:#fff;box-shadow:0 0 0 3px rgba(67,97,238,.08)}
+.form-row textarea{resize:vertical;min-height:60px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:2px solid #f0f4f8}
+/* LOCATIONS */
+.loc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.loc-card{background:#fff;border-radius:12px;border:2px solid #e8eef6;padding:14px;transition:all .2s;cursor:pointer}
+.loc-card:hover{border-color:#4361ee;box-shadow:0 4px 12px rgba(67,97,238,.15)}
+/* PAGINATION */
+.pagination{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:10px;font-size:12px;color:#666;background:#fff;padding:8px 12px;border-radius:8px;border:1px solid #e8eef6}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px)}
+.modal{background:#fff;border-radius:16px;padding:24px;width:90%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h3{font-size:16px;font-weight:bold;margin-bottom:16px;color:#1a3a5c;padding-bottom:10px;border-bottom:2px solid #f0f4f8}
+/* REPORT */
+.report-header-print{background:linear-gradient(135deg,#1a3a5c,#4361ee);color:#fff;border-radius:12px;padding:16px;margin-bottom:14px;text-align:center}
+.row-actions{display:flex;gap:4px}
+.row-actions button{padding:3px 8px;font-size:11px}
+@media print{
+  .nav,.toolbar,.row-actions,.pagination,#no-print,.header-actions{display:none!important}
+  body{background:#fff;font-size:10px}
+  #main-app,.main{background:#fff!important}
+  .report-header-print{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table{border-collapse:collapse!important;width:100%!important;font-size:10px}
+  th,td{border:1px solid #555!important;padding:4px 6px!important}
+  thead tr{background:#dce6f0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .badge{border:1px solid #888;font-size:9px;padding:1px 4px}
+  .table-wrap{border:none!important;box-shadow:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page" class="login-wrap">
+  <div class="login-box">
+    <div style="font-size:40px;margin-bottom:10px">🏫</div>
+    <h2>سیستم مدیریت اموال</h2>
+    <p>دبستان شهید نیاسری ۱</p>
+    <input type="password" id="pwd-input" placeholder="رمز عبور" maxlength="10" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">🔐 ورود</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+<div class="header">
+  <div>
+    <h1>📋 سیستم مدیریت اموال</h1>
+    <p id="header-sub">دبستان پسرانه شهید نیاسری ۱ | مدیر: محمد حیدری | اداره آموزش و پرورش ناحیه ۳ کرج</p>
+  </div>
+  <div class="header-actions">
+    <span style="font-size:11px;opacity:.7" id="date-lbl"></span>
+    <button onclick="showTab('settings')">⚙️ تنظیمات</button>
+    <button onclick="doLogout()">🚪 خروج</button>
+  </div>
+</div>
+<div class="nav">
+  <button class="nav-btn active" onclick="showTab('dashboard')">📊 داشبورد</button>
+  <button class="nav-btn" onclick="showTab('assets')">📦 فهرست اموال</button>
+  <button class="nav-btn" onclick="showTab('add')">➕ افزودن مال</button>
+  <button class="nav-btn" onclick="showTab('locations')">🏫 مکان‌ها</button>
+  <button class="nav-btn" onclick="showTab('report')">📄 گزارش</button>
+  <button class="nav-btn" onclick="showTab('settings')">⚙️ تنظیمات</button>
+</div>
+<div class="main" id="app"></div>
+</div>
+
+<script>
+const PDF_DATA = [
+  {id:1,row:1,tag:'496',code:'231040001',type:'غیرمصرفی',name:'مانیتور',model:'LG',price:1600000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:2,row:2,tag:'8459',code:'231040001',type:'غیرمصرفی',name:'مانیتور',model:'ال جی - LCD',price:1800000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:3,row:3,tag:'23329',code:'231010042',type:'غیرمصرفی',name:'تلویزیون',model:'21 اینچ - صا ایران',price:1500000,location:'سالن',hasTag:true,notes:''},
+  {id:4,row:4,tag:'23333',code:'235020010',type:'غیرمصرفی',name:'دوربین فیلمبرداری',model:'هندی کم - سامسونگ',price:2000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:5,row:5,tag:'23337',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'نقره‌ای - مادایران',price:3000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:6,row:6,tag:'23338',code:'231040001',type:'غیرمصرفی',name:'مانیتور',model:'17 اینچ - ال جی',price:1200000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:7,row:7,tag:'23341',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'پنتیوم - گرین',price:4000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:8,row:8,tag:'23345',code:'231040007',type:'غیرمصرفی',name:'چاپگر',model:'1640 - سامسونگ',price:2500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:9,row:9,tag:'23347',code:'231040006',type:'غیرمصرفی',name:'اسکنر',model:'2400 - اچ پی',price:1500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:10,row:10,tag:'23348',code:'231030062',type:'غیرمصرفی',name:'صندوق نسوز',model:'بلند - فولادی',price:2000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:11,row:11,tag:'23350',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'2120 - شارپ',price:17000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:12,row:12,tag:'23352',code:'235010002',type:'غیرمصرفی',name:'دوربین دیجیتال',model:'S-860 - سامسونگ',price:2500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:13,row:13,tag:'23354',code:'231040001',type:'غیرمصرفی',name:'مانیتور',model:'19 اینچ LCD - AOC',price:1800000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:14,row:14,tag:'23355',code:'231040007',type:'غیرمصرفی',name:'چاپگر',model:'2014 - اچ پی',price:2000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:15,row:15,tag:'23357',code:'231040006',type:'غیرمصرفی',name:'اسکنر',model:'48t - اچ پی',price:1500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:16,row:16,tag:'47023',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'پاناسونیک',price:17200000,location:'کلاس',hasTag:true,notes:''},
+  {id:17,row:17,tag:'47024',code:'231030032',type:'غیرمصرفی',name:'تخته وایت‌برد',model:'برد هوشمند - MICRONITS',price:27000000,location:'کلاس',hasTag:true,notes:''},
+  {id:18,row:18,tag:'47028',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'22LX - پاناسونیک',price:16800000,location:'کلاس',hasTag:true,notes:''},
+  {id:19,row:19,tag:'47029',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'22LX - پاناسونیک',price:16800000,location:'کلاس',hasTag:true,notes:''},
+  {id:20,row:20,tag:'47030',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'22LX - پاناسونیک',price:16800000,location:'کلاس',hasTag:true,notes:''},
+  {id:21,row:21,tag:'47031',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'22LX - پاناسونیک',price:16800000,location:'کلاس',hasTag:true,notes:''},
+  {id:22,row:22,tag:'47033',code:'231030032',type:'غیرمصرفی',name:'تخته وایت‌برد',model:'برد هوشمند - MICRONITS',price:27000000,location:'کلاس',hasTag:true,notes:''},
+  {id:23,row:23,tag:'47034',code:'231030032',type:'غیرمصرفی',name:'تخته وایت‌برد',model:'برد هوشمند - MICRONITS',price:27000000,location:'کلاس',hasTag:true,notes:''},
+  {id:24,row:24,tag:'47035',code:'231030032',type:'غیرمصرفی',name:'تخته وایت‌برد',model:'برد هوشمند - MICRONITS',price:27000000,location:'کلاس',hasTag:true,notes:''},
+  {id:25,row:25,tag:'47036',code:'231030032',type:'غیرمصرفی',name:'تخته وایت‌برد',model:'برد هوشمند - MICRONITS',price:27000000,location:'کلاس',hasTag:true,notes:''},
+  {id:26,row:26,tag:'47037',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'کامل - کلاس',price:11500000,location:'کلاس',hasTag:true,notes:''},
+  {id:27,row:27,tag:'47038',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'کامل - کلاس',price:11500000,location:'کلاس',hasTag:true,notes:''},
+  {id:28,row:28,tag:'47039',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'کامل - کلاس',price:11500000,location:'کلاس',hasTag:true,notes:''},
+  {id:29,row:29,tag:'55020',code:'231040007',type:'غیرمصرفی',name:'چاپگر',model:'401dn - HP',price:7840000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:30,row:30,tag:'74079',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'بنگیو',price:10000000,location:'کلاس',hasTag:true,notes:''},
+  {id:31,row:31,tag:'74080',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'NEC',price:9500000,location:'کلاس',hasTag:true,notes:''},
+  {id:32,row:32,tag:'74081',code:'231040011',type:'غیرمصرفی',name:'نت‌بوک (لپ‌تاپ)',model:'اچ پی',price:11000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:33,row:33,tag:'74893',code:'231010073',type:'غیرمصرفی',name:'ویدئو پروژکتور',model:'ایسر',price:12000000,location:'کلاس',hasTag:true,notes:''},
+  {id:34,row:34,tag:'79959',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'2250 - ریکو',price:40000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:35,row:35,tag:'85956',code:'231020005',type:'غیرمصرفی',name:'جاروب برقی',model:'3 موتوره',price:5330000,location:'انبار',hasTag:true,notes:''},
+  {id:36,row:36,tag:'88979',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'AR-202x - شارپ',price:58259410,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:37,row:37,tag:'89763',code:'241020823',type:'غیرمصرفی',name:'دستگاه ضبط دوربین مداربسته',model:'16 کانال با دوربین',price:18000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:38,row:38,tag:'103981',code:'251050015',type:'غیرمصرفی',name:'کمپرسور',model:'کمیسیون ماده دو 1382',price:39500000,location:'انبار',hasTag:true,notes:''},
+  {id:39,row:39,tag:'127165',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'',price:600000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:40,row:40,tag:'127166',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'',price:600000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:41,row:41,tag:'127167',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'',price:600000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:42,row:42,tag:'127168',code:'231040007',type:'غیرمصرفی',name:'چاپگر',model:'',price:70000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:43,row:43,tag:'127169',code:'231040007',type:'غیرمصرفی',name:'چاپگر',model:'هندلی',price:70000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:44,row:44,tag:'127170',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'',price:15000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:45,row:45,tag:'127171',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'',price:15000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:46,row:46,tag:'127172',code:'231040002',type:'غیرمصرفی',name:'کیس',model:'',price:15000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:47,row:47,tag:'127173',code:'231040001',type:'غیرمصرفی',name:'مانیتور',model:'',price:80000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:48,row:48,tag:'127174',code:'231040001',type:'غیرمصرفی',name:'مانیتور',model:'',price:80000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:49,row:49,tag:'127175',code:'231010045',type:'غیرمصرفی',name:'رادیو',model:'',price:20000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:50,row:50,tag:'127176',code:'231030009',type:'غیرمصرفی',name:'فایل',model:'',price:60000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:51,row:51,tag:'127177',code:'231030009',type:'غیرمصرفی',name:'فایل',model:'',price:60000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:52,row:52,tag:'127178',code:'231030009',type:'غیرمصرفی',name:'فایل',model:'',price:60000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:53,row:53,tag:'127179',code:'231030017',type:'غیرمصرفی',name:'کمد',model:'',price:60000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:54,row:54,tag:'127180',code:'231030017',type:'غیرمصرفی',name:'کمد',model:'',price:60000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:55,row:55,tag:'127316',code:'231020056',type:'غیرمصرفی',name:'فتوکپی (زیراکس)',model:'',price:570000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:56,row:56,tag:'1016329',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'تحریر - چوب',price:500000,location:'کلاس',hasTag:true,notes:''},
+  {id:57,row:57,tag:'1091358',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:58,row:58,tag:'1091359',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:59,row:59,tag:'1091360',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:60,row:60,tag:'1091361',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:61,row:61,tag:'1091362',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:62,row:62,tag:'1091363',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'اداری-تحریر',price:500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:63,row:63,tag:'1091364',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'اداری-تحریر',price:500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:64,row:64,tag:'1091365',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'اداری-تحریر',price:500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:65,row:65,tag:'1091366',code:'231030163',type:'درحکم‌مصرفی',name:'صندلی گردان',model:'چرخ‌دار',price:500000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:66,row:66,tag:'1091367',code:'231030017',type:'درحکم‌مصرفی',name:'کمد',model:'بایگانی',price:600000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:67,row:67,tag:'1091368',code:'231030017',type:'درحکم‌مصرفی',name:'کمد',model:'بایگانی',price:600000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:68,row:68,tag:'1091369',code:'231030017',type:'درحکم‌مصرفی',name:'کمد',model:'بایگانی',price:600000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:69,row:69,tag:'1091370',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:70,row:70,tag:'1091371',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:71,row:71,tag:'1091372',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:72,row:72,tag:'1091373',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:73,row:73,tag:'1091374',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:74,row:74,tag:'1091375',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:75,row:75,tag:'1091376',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:76,row:76,tag:'1091377',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:77,row:77,tag:'1091378',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:78,row:78,tag:'1091379',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:79,row:79,tag:'1091380',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:80,row:80,tag:'1091381',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:81,row:81,tag:'1091382',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:82,row:82,tag:'1091383',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:83,row:83,tag:'1091384',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:84,row:84,tag:'1091385',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:85,row:85,tag:'1091386',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:86,row:86,tag:'1091387',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:87,row:87,tag:'1091388',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:88,row:88,tag:'1091389',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:89,row:89,tag:'1091390',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:90,row:90,tag:'1091391',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:91,row:91,tag:'1091392',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:92,row:92,tag:'1091393',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:93,row:93,tag:'1091394',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:94,row:94,tag:'1091395',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:95,row:95,tag:'1091396',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:96,row:96,tag:'1091397',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:97,row:97,tag:'1091398',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:98,row:98,tag:'1091399',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:99,row:99,tag:'1091400',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:100,row:100,tag:'1091401',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:101,row:101,tag:'1091402',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:102,row:102,tag:'1091403',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:103,row:103,tag:'1091404',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:104,row:104,tag:'1091405',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:105,row:105,tag:'1091406',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:106,row:106,tag:'1091407',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:107,row:107,tag:'1091408',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:108,row:108,tag:'1091409',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:109,row:109,tag:'1091410',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:110,row:110,tag:'1091411',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:111,row:111,tag:'1091412',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:112,row:112,tag:'1091413',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:113,row:113,tag:'1091414',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:114,row:114,tag:'1091415',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:115,row:115,tag:'1091416',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:116,row:116,tag:'1091417',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:117,row:117,tag:'1091418',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:118,row:118,tag:'1091419',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:119,row:119,tag:'1091420',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:120,row:120,tag:'1091421',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:121,row:121,tag:'1091422',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:122,row:122,tag:'1091423',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:123,row:123,tag:'1091424',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:124,row:124,tag:'1091425',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:125,row:125,tag:'1091426',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:126,row:126,tag:'1091427',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:127,row:127,tag:'1091428',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:128,row:128,tag:'1091429',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:129,row:129,tag:'1091430',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:130,row:130,tag:'1091431',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:131,row:131,tag:'1091432',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:132,row:132,tag:'1091433',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:133,row:133,tag:'1091434',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:134,row:134,tag:'1091435',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:135,row:135,tag:'1091436',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:136,row:136,tag:'1091437',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:137,row:137,tag:'1091438',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:138,row:138,tag:'1091439',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:139,row:139,tag:'1091440',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:140,row:140,tag:'1091441',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:141,row:141,tag:'1091442',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:142,row:142,tag:'1091443',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:143,row:143,tag:'1091444',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:144,row:144,tag:'1091445',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:145,row:145,tag:'1091446',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:146,row:146,tag:'1091447',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:147,row:147,tag:'1091448',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:148,row:148,tag:'1091449',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:149,row:149,tag:'1091450',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:150,row:150,tag:'1091451',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:151,row:151,tag:'1091452',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:152,row:152,tag:'1091453',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:153,row:153,tag:'1091454',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:154,row:154,tag:'1091455',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:155,row:155,tag:'1091456',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:156,row:156,tag:'1091457',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:157,row:157,tag:'1091458',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:158,row:158,tag:'1091459',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:159,row:159,tag:'1091460',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:160,row:160,tag:'1091461',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:161,row:161,tag:'1091462',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:162,row:162,tag:'1091463',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:163,row:163,tag:'1091464',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:164,row:164,tag:'1091465',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:165,row:165,tag:'1091466',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:166,row:166,tag:'1091467',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:167,row:167,tag:'1091468',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:168,row:168,tag:'1091469',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:350000,location:'کلاس',hasTag:true,notes:''},
+  {id:169,row:169,tag:'1103123',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:170,row:170,tag:'1103124',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:171,row:171,tag:'1103125',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:172,row:172,tag:'1103126',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:173,row:173,tag:'1103127',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:174,row:174,tag:'1103128',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:175,row:175,tag:'1103129',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:176,row:176,tag:'1103130',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:177,row:177,tag:'1103131',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:178,row:178,tag:'1103132',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:179,row:179,tag:'1103133',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:180,row:180,tag:'1103134',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:181,row:181,tag:'1103135',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:182,row:182,tag:'1103136',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:183,row:183,tag:'1103137',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:184,row:184,tag:'1103138',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:185,row:185,tag:'1103139',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:186,row:186,tag:'1103140',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:187,row:187,tag:'1103141',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:188,row:188,tag:'1103142',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1180000,location:'کلاس',hasTag:true,notes:''},
+  {id:189,row:189,tag:'1105628',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:190,row:190,tag:'1105629',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:191,row:191,tag:'1105630',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:192,row:192,tag:'1105631',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:193,row:193,tag:'1105632',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:194,row:194,tag:'1105633',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:195,row:195,tag:'1105634',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:196,row:196,tag:'1105635',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:197,row:197,tag:'1105636',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:198,row:198,tag:'1105637',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'معلم',price:340000,location:'کلاس',hasTag:true,notes:''},
+  {id:199,row:199,tag:'1108068',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:200,row:200,tag:'1108069',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:201,row:201,tag:'1108070',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:202,row:202,tag:'1108071',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:203,row:203,tag:'1108072',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:204,row:204,tag:'1108073',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:205,row:205,tag:'1108074',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:206,row:206,tag:'1108075',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:207,row:207,tag:'1108076',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:208,row:208,tag:'1108077',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'میز معلم',price:941760,location:'کلاس',hasTag:true,notes:''},
+  {id:209,row:209,tag:'1117012',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:210,row:210,tag:'1117013',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:211,row:211,tag:'1117014',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:212,row:212,tag:'1117015',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:213,row:213,tag:'1117016',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:214,row:214,tag:'1117017',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:215,row:215,tag:'1117018',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'اداری-مبلی',price:1000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:216,row:216,tag:'1117019',code:'231030032',type:'درحکم‌مصرفی',name:'تخته وایت‌برد',model:'2*100',price:2000000,location:'کلاس',hasTag:true,notes:''},
+  {id:217,row:217,tag:'1117020',code:'231030032',type:'درحکم‌مصرفی',name:'تخته وایت‌برد',model:'2*100',price:2000000,location:'کلاس',hasTag:true,notes:''},
+  {id:218,row:218,tag:'1117021',code:'231030032',type:'درحکم‌مصرفی',name:'تخته وایت‌برد',model:'100*19',price:1500000,location:'کلاس',hasTag:true,notes:''},
+  {id:219,row:219,tag:'1117022',code:'231030032',type:'درحکم‌مصرفی',name:'تخته وایت‌برد',model:'100*19',price:1500000,location:'کلاس',hasTag:true,notes:''},
+  {id:220,row:220,tag:'1127632',code:'231030163',type:'درحکم‌مصرفی',name:'صندلی گردان',model:'',price:3400000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:221,row:221,tag:'1127633',code:'231030163',type:'درحکم‌مصرفی',name:'صندلی گردان',model:'',price:3400000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:222,row:222,tag:'1150390',code:'231030058',type:'درحکم‌مصرفی',name:'کپسول آتش‌نشانی',model:'6 لیتری',price:2100000,location:'انبار',hasTag:true,notes:''},
+  {id:223,row:223,tag:'1151639',code:'231030009',type:'درحکم‌مصرفی',name:'فایل',model:'چهار کشو',price:2800000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:224,row:224,tag:'1151640',code:'231030009',type:'درحکم‌مصرفی',name:'فایل',model:'چهار کشو',price:2800000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:225,row:225,tag:'1151905',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:226,row:226,tag:'1151906',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:227,row:227,tag:'1151907',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:228,row:228,tag:'1151908',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:229,row:229,tag:'1151909',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:230,row:230,tag:'1151910',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:231,row:231,tag:'1151912',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:232,row:232,tag:'1151913',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:233,row:233,tag:'1151914',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:234,row:234,tag:'1151915',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:235,row:235,tag:'1151916',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:236,row:236,tag:'1151917',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:237,row:237,tag:'1151918',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:238,row:238,tag:'1151919',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:239,row:239,tag:'1151920',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:240,row:240,tag:'1151921',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:241,row:241,tag:'1151922',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:242,row:242,tag:'1151923',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:243,row:243,tag:'1151924',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:244,row:244,tag:'1151925',code:'231030022',type:'درحکم‌مصرفی',name:'نیمکت',model:'میزونیمکت',price:1600000,location:'کلاس',hasTag:true,notes:''},
+  {id:245,row:245,tag:'1168651',code:'242010103',type:'درحکم‌مصرفی',name:'یونیت آموزشی',model:'آزمایشگاهی',price:3800000,location:'آزمایشگاه',hasTag:true,notes:''},
+  {id:246,row:246,tag:'2143053',code:'231040001',type:'درحکم‌مصرفی',name:'مانیتور',model:'',price:40000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:247,row:247,tag:'2143054',code:'231040001',type:'درحکم‌مصرفی',name:'مانیتور',model:'',price:40000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:248,row:248,tag:'2143055',code:'231040001',type:'درحکم‌مصرفی',name:'مانیتور',model:'',price:40000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:249,row:249,tag:'2143056',code:'231040001',type:'درحکم‌مصرفی',name:'مانیتور',model:'',price:40000000,location:'دفتر مدیریت',hasTag:true,notes:''},
+  {id:250,row:250,tag:'2143057',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:251,row:251,tag:'2143058',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:252,row:252,tag:'2143059',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:253,row:253,tag:'2143060',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:254,row:254,tag:'2143061',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:255,row:255,tag:'2143062',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:256,row:256,tag:'2143063',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:257,row:257,tag:'2143064',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:258,row:258,tag:'2143065',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:259,row:259,tag:'2143066',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:260,row:260,tag:'2143067',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:261,row:261,tag:'2143068',code:'231030011',type:'درحکم‌مصرفی',name:'صندلی',model:'',price:120000000,location:'سالن',hasTag:true,notes:''},
+  {id:262,row:262,tag:'2143069',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'',price:80000000,location:'سالن',hasTag:true,notes:''},
+  {id:263,row:263,tag:'2143070',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'',price:80000000,location:'سالن',hasTag:true,notes:''},
+  {id:264,row:264,tag:'2143071',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'',price:80000000,location:'سالن',hasTag:true,notes:''},
+  {id:265,row:265,tag:'2143072',code:'231030001',type:'درحکم‌مصرفی',name:'میز',model:'',price:80000000,location:'سالن',hasTag:true,notes:''},
+];
+
+// ===== STATE =====
+let appSettings = JSON.parse(localStorage.getItem('niasari_settings')||'null') || {
+  password:'2225',
+  schoolName:'دبستان پسرانه شهید نیاسری ۱',
+  principal:'محمد حیدری',
+  keeper:'محمد باقر نجار',
+  org:'اداره آموزش و پرورش ناحیه ۳ کرج',
+  sig1:'محمد حیدری',sig2:'محمد باقر نجار',sig3:'محمد باقر نجار'
+};
+let assets = JSON.parse(localStorage.getItem('niasari_assets')||'null') || PDF_DATA.map(a=>({...a}));
+let locations = JSON.parse(localStorage.getItem('niasari_locations')||'null') || ['دفتر مدیریت','سالن','آزمایشگاه','کلاس','انبار'];
+let currentTab='dashboard';
+let searchQ='',filterType='',filterLoc='',filterTag='',filterScrap='',filterSurplus='';
+let currentPage=1; const PAGE_SIZE=99999;
+let editingId=null;
+let sortField='row',sortDir=1;
+let loggedIn=false;
+let itemImages = JSON.parse(localStorage.getItem('niasari_images')||'{}');
+// images stored per asset ID: itemImages[assetId] = base64
+let printColumns = JSON.parse(localStorage.getItem('niasari_printcols')||'null') || {row:true,tag:true,code:true,name:true,type:true,model:true,price:false,location:true,hasTag:true,isScrap:true,isSurplus:true,notes:true};
+
+function saveAll(){
+  localStorage.setItem('niasari_assets',JSON.stringify(assets));
+  localStorage.setItem('niasari_locations',JSON.stringify(locations));
+  localStorage.setItem('niasari_settings',JSON.stringify(appSettings));
+  localStorage.setItem('niasari_images',JSON.stringify(itemImages));
+  localStorage.setItem('niasari_printcols',JSON.stringify(printColumns));
+}
+function fmt(n){return Number(n).toLocaleString('fa-IR');}
+function today(){return new Date().toLocaleDateString('fa-IR');}
+
+// ===== LOGIN =====
+function doLogin(){
+  const v=document.getElementById('pwd-input').value;
+  if(v===appSettings.password){
+    loggedIn=true;
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('main-app').style.display='block';
+    document.getElementById('date-lbl').textContent=today();
+    updateHeader();
+    showTab('dashboard');
+  } else {
+    document.getElementById('login-err').textContent='رمز عبور اشتباه است';
+    document.getElementById('pwd-input').value='';
+    document.getElementById('pwd-input').focus();
+  }
+}
+function doLogout(){
+  loggedIn=false;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+  document.getElementById('pwd-input').value='';
+  document.getElementById('login-err').textContent='';
+}
+function updateHeader(){
+  document.getElementById('header-sub').textContent=
+    appSettings.schoolName+' | مدیر: '+appSettings.principal+' | '+appSettings.org;
+}
+
+// ===== TABS =====
+function showTab(t){
+  currentTab=t;
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.remove('active'));
+  const tabs=['dashboard','assets','add','locations','report','settings'];
+  const idx=tabs.indexOf(t);
+  if(idx>=0)document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  render();
+}
+
+// ===== FILTER =====
+function getFiltered(){
+  return assets.filter(a=>{
+    const q=searchQ.trim().toLowerCase();
+    const mq=!q||(
+      (a.name||'').toLowerCase().includes(q)||
+      (a.tag||'').toLowerCase().includes(q)||
+      (a.code||'').toLowerCase().includes(q)||
+      (a.model||'').toLowerCase().includes(q)||
+      (a.location||'').toLowerCase().includes(q)||
+      (a.type||'').toLowerCase().includes(q)||
+      (a.notes||'').toLowerCase().includes(q)
+    );
+    const mt=!filterType||a.type===filterType;
+    const ml=!filterLoc||a.location===filterLoc;
+    const mh=!filterTag||(filterTag==='yes'&&a.hasTag)||(filterTag==='no'&&!a.hasTag);
+    const ms=!filterScrap||(filterScrap==='yes'&&a.isScrap)||(filterScrap==='no'&&!a.isScrap);
+    const mx=!filterSurplus||(filterSurplus==='yes'&&a.isSurplus)||(filterSurplus==='no'&&!a.isSurplus);
+    return mq&&mt&&ml&&mh&&ms&&mx;
+  });
+}
+function getSorted(arr){
+  return [...arr].sort((a,b)=>{
+    let va=a[sortField],vb=b[sortField];
+    if(va===undefined||va===null)va='';
+    if(vb===undefined||vb===null)vb='';
+    if(sortField==='price'||sortField==='row'){
+      return(Number(va)-Number(vb))*sortDir;
+    }
+    if(typeof va==='boolean') return (va===vb?0:va?-1:1)*sortDir;
+    return String(va).localeCompare(String(vb),'fa',{sensitivity:'base',numeric:true})*sortDir;
+  });
+}
+
+// ===== RENDER =====
+function render(){
+  const app=document.getElementById('app');
+  if(!app)return;
+  if(currentTab==='dashboard')renderDashboard(app);
+  else if(currentTab==='assets')renderAssets(app);
+  else if(currentTab==='add')renderAdd(app);
+  else if(currentTab==='locations')renderLocations(app);
+  else if(currentTab==='report')renderReport(app);
+  else if(currentTab==='settings')renderSettings(app);
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(app){
+  const total=assets.length;
+  const nonC=assets.filter(a=>a.type==='غیرمصرفی').length;
+  const cons=assets.filter(a=>a.type==='درحکم‌مصرفی').length;
+  const withTag=assets.filter(a=>a.hasTag).length;
+  const scrapCount=assets.filter(a=>a.isScrap).length;
+  const surplusCount=assets.filter(a=>a.isSurplus).length;
+  const totalVal=assets.reduce((s,a)=>s+(a.price||0),0);
+  const byLoc={};assets.forEach(a=>{byLoc[a.location]=(byLoc[a.location]||0)+1});
+  const byName={};assets.forEach(a=>{byName[a.name]=(byName[a.name]||0)+1});
+  const nameList=Object.entries(byName).sort((a,b)=>b[1]-a[1]);
+  const locColors=['#4361ee','#f72585','#7209b7','#f8961e','#4cc9f0','#06d6a0'];
+  const maxLoc=Math.max(...Object.values(byLoc),1);
+  const maxName=nameList.length?nameList[0][1]:1;
+  app.innerHTML=`
+  <div class="stat-grid">
+    <div class="stat-card" style="background:linear-gradient(135deg,#4361ee,#3a0ca3)"><div class="num">${total.toLocaleString('fa-IR')}</div><div class="lbl">📦 کل اموال</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f72585,#b5179e)"><div class="num">${nonC.toLocaleString('fa-IR')}</div><div class="lbl">🔴 غیرمصرفی</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f8961e,#f3722c)"><div class="num">${cons.toLocaleString('fa-IR')}</div><div class="lbl">🟡 در حکم مصرفی</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#06d6a0,#1b9aaa)"><div class="num">${withTag.toLocaleString('fa-IR')}</div><div class="lbl">✅ برچسب‌دار</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#7209b7,#560bad)"><div class="num" style="font-size:18px">${Math.round(totalVal/1000000).toLocaleString('fa-IR')}M</div><div class="lbl">💰 ارزش (ریال)</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#e63946,#c1121f)"><div class="num">${scrapCount.toLocaleString('fa-IR')}</div><div class="lbl">⚠️ اسقاطی</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f4a261,#e76f51)"><div class="num">${surplusCount.toLocaleString('fa-IR')}</div><div class="lbl">📦 مازاد</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e8eef6;box-shadow:0 2px 8px rgba(0,0,0,.05)">
+      <div style="font-size:13px;font-weight:bold;color:#1a3a5c;margin-bottom:12px">🏫 توزیع بر اساس مکان <span style="font-size:11px;color:#999">(کلیک برای جزئیات)</span></div>
+      ${Object.entries(byLoc).map(([k,v],i)=>`
+        <div style="margin-bottom:11px;cursor:pointer" onclick="showLocDetail('${k}')">
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
+            <span style="font-weight:bold;color:#1a3a5c">🏷️ ${k}</span>
+            <span style="color:${locColors[i%locColors.length]};font-weight:bold;background:${locColors[i%locColors.length]}18;padding:2px 8px;border-radius:10px">${v} قلم</span>
+          </div>
+          <div style="background:#eef0f8;border-radius:20px;height:8px;overflow:hidden">
+            <div style="background:${locColors[i%locColors.length]};height:100%;border-radius:20px;width:${Math.round(v/maxLoc*100)}%;transition:width .5s"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e8eef6;box-shadow:0 2px 8px rgba(0,0,0,.05);max-height:420px;overflow-y:auto">
+      <div style="font-size:13px;font-weight:bold;color:#1a3a5c;margin-bottom:12px">📊 همه اموال با تعداد</div>
+      ${nameList.map(([k,v],i)=>{
+        const cols=['#4361ee','#f72585','#f8961e','#06d6a0','#7209b7','#4cc9f0','#e63946','#2d6a4f'];
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:24px;height:24px;border-radius:6px;background:${cols[i%cols.length]}22;color:${cols[i%cols.length]};font-size:10px;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${k}</div>
+            <div style="background:#f0f0f0;border-radius:20px;height:5px;margin-top:3px"><div style="background:${cols[i%cols.length]};height:100%;border-radius:20px;width:${Math.round(v/maxName*100)}%"></div></div>
+          </div>
+          <span style="font-size:12px;font-weight:bold;color:${cols[i%cols.length]};min-width:28px;text-align:center">${v}</span>
+        </div>`;}).join('')}
+    </div>
+  </div>`;
+}
+
+function showLocDetail(loc){
+  const items=assets.filter(a=>a.location===loc);
+  const bg=document.createElement('div');
+  bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal" style="max-width:700px;max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f0f4f8">
+      <h3 style="margin:0;padding:0;border:none">📍 اموال ${loc} — ${items.length} قلم</h3>
+      <div style="display:flex;gap:6px">
+        <button class="btn-blue" onclick="printLocDetail('${loc}')" style="font-size:12px;padding:5px 12px">🖨️ چاپ</button>
+        <button onclick="this.closest('.modal-bg').remove()" style="font-size:12px;padding:5px 12px">✕ بستن</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f0f4ff">
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">ردیف</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">برچسب</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">عنوان مال</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">نوع</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">مدل</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">قیمت</th>
+      </tr></thead>
+      <tbody>
+        ${items.map((a,i)=>`<tr style="${i%2?'background:#fafbfe':''}">
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">${a.row||i+1}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;font-family:monospace;font-size:11px">${a.tag}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;font-weight:bold">${a.name}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">${a.type}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;color:#666">${a.model||'—'}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">${a.price?fmt(a.price):'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:#f7fafd;border-radius:8px;font-size:12px;color:#555;text-align:left">
+      جمع ارزش: <strong>${fmt(items.reduce((s,a)=>s+(a.price||0),0))}</strong> ریال
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+}
+
+function printLocDetail(loc){
+  const items=assets.filter(a=>a.location===loc);
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>اموال ${loc}</title>
+  <style>body{font-family:Tahoma;font-size:11px;direction:rtl}h2,h3{text-align:center}table{width:100%;border-collapse:collapse}th,td{border:1px solid #555;padding:5px 7px;text-align:right}thead tr{background:#e0e8f0}</style></head>
+  <body><h2>${appSettings.schoolName}</h2><h3>فهرست اموال — ${loc} — تعداد: ${items.length} قلم</h3>
+  <table><thead><tr><th>ردیف</th><th>برچسب</th><th>عنوان مال</th><th>نوع</th><th>مدل</th><th>قیمت (ریال)</th></tr></thead><tbody>
+  ${items.map((a,i)=>`<tr><td>${a.row||i+1}</td><td>${a.tag}</td><td>${a.name}</td><td>${a.type}</td><td>${a.model||''}</td><td>${a.price?a.price.toLocaleString():''}</td></tr>`).join('')}
+  </tbody></table>
+  <p style="margin-top:16px;text-align:left">جمع ارزش: ${items.reduce((s,a)=>s+(a.price||0),0).toLocaleString()} ریال</p>
+  <div style="display:flex;justify-content:space-around;margin-top:28px">
+    <div style="text-align:center">${appSettings.sig1}<br><br>امضاء: ________________</div>
+    <div style="text-align:center">${appSettings.sig2}<br><br>امضاء: ________________</div>
+    <div style="text-align:center">${appSettings.sig3}<br><br>امضاء: ________________</div>
+  </div>
+  <script>window.onload=()=>window.print();<\/script></body></html>`);
+}
+
+// ===== ASSETS =====
+// global sort handler for assets table
+function assetSort(f){
+  if(sortField===f){sortDir*=-1;}else{sortField=f;sortDir=1;}
+  currentPage=1;
+  renderAssets(document.getElementById('app'));
+}
+
+function renderAssets(app){
+  const filtered=getSorted(getFiltered());
+  const totalPages=Math.ceil(filtered.length/PAGE_SIZE)||1;
+  if(currentPage>totalPages)currentPage=1;
+  const paged=filtered.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE);
+  function arr(f){return sortField===f?(sortDir===1?'▲':'▼'):'⇅';}
+  app.innerHTML=`
+  <div class="toolbar">
+    <input type="text" id="asset-search" placeholder="🔍 جستجو در نام، برچسب، کد، مکان، مدل..." value="${searchQ}">
+    <select id="filter-type" onchange="filterType=this.value;currentPage=1;renderAssets(document.getElementById('app'))">
+      <option value="">همه نوع‌ها</option>
+      <option value="غیرمصرفی" ${filterType==='غیرمصرفی'?'selected':''}>غیرمصرفی</option>
+      <option value="درحکم‌مصرفی" ${filterType==='درحکم‌مصرفی'?'selected':''}>در حکم مصرفی</option>
+      <option value="مصرفی" ${filterType==='مصرفی'?'selected':''}>مصرفی</option>
+    </select>
+    <select id="filter-loc" onchange="filterLoc=this.value;currentPage=1;renderAssets(document.getElementById('app'))">
+      <option value="">همه مکان‌ها</option>
+      ${locations.map(l=>`<option value="${l}" ${filterLoc===l?'selected':''}>${l}</option>`).join('')}
+    </select>
+    <select id="filter-tag" onchange="filterTag=this.value;currentPage=1;renderAssets(document.getElementById('app'))">
+      <option value="">همه (برچسب)</option>
+      <option value="yes" ${filterTag==='yes'?'selected':''}>✅ برچسب‌دار</option>
+      <option value="no" ${filterTag==='no'?'selected':''}>❌ بدون برچسب</option>
+    </select>
+    <select onchange="filterScrap=this.value;currentPage=1;renderAssets(document.getElementById('app'))">
+      <option value="">همه (اسقاطی)</option>
+      <option value="yes" ${filterScrap==='yes'?'selected':''}>⚠️ اسقاطی</option>
+      <option value="no" ${filterScrap==='no'?'selected':''}>سالم</option>
+    </select>
+    <select onchange="filterSurplus=this.value;currentPage=1;renderAssets(document.getElementById('app'))">
+      <option value="">همه (مازاد)</option>
+      <option value="yes" ${filterSurplus==='yes'?'selected':''}>📦 مازاد</option>
+      <option value="no" ${filterSurplus==='no'?'selected':''}>در استفاده</option>
+    </select>
+    <button class="btn-blue" onclick="editingId=null;showTab('add')">➕ افزودن</button>
+    <button onclick="printAssetsList('portrait')" style="background:#e3edff;border:1px solid #b0c8ff;color:#1a3a8c;font-size:12px">🖨️ چاپ عمودی</button>
+    <button onclick="printAssetsList('landscape')" style="background:#e0f7ee;border:1px solid #9fdac4;color:#1b7a4a;font-size:12px">🖨️ چاپ افقی</button>
+  </div>
+  <div style="font-size:12px;color:#666;margin-bottom:6px;padding-right:4px">${filtered.length.toLocaleString('fa-IR')} مورد یافت شد</div>
+  <div class="table-wrap">
+    <table id="assets-table">
+      <colgroup>
+        <col style="width:40px">
+        <col style="width:80px">
+        <col style="width:70px">
+        <col style="width:14%">
+        <col style="width:44px">
+        <col style="width:80px">
+        <col style="width:10%">
+        <col style="width:80px">
+        <col style="width:10%">
+        <col style="width:50px">
+        <col style="width:50px">
+        <col style="width:50px">
+        <col style="width:70px">
+      </colgroup>
+      <thead><tr>
+        <th onclick="assetSort('row')">ردیف ${arr('row')}</th>
+        <th onclick="assetSort('tag')">شماره برچسب ${arr('tag')}</th>
+        <th onclick="assetSort('code')">کد مال ${arr('code')}</th>
+        <th onclick="assetSort('name')">عنوان مال ${arr('name')}</th>
+        <th style="width:44px">تصویر</th>
+        <th onclick="assetSort('type')">نوع ${arr('type')}</th>
+        <th onclick="assetSort('model')">مدل/ویژگی ${arr('model')}</th>
+        <th onclick="assetSort('price')">قیمت (ریال) ${arr('price')}</th>
+        <th onclick="assetSort('location')">مکان ${arr('location')}</th>
+        <th onclick="assetSort('hasTag')">برچسب ${arr('hasTag')}</th>
+        <th onclick="assetSort('isScrap')">اسقاطی ${arr('isScrap')}</th>
+        <th onclick="assetSort('isSurplus')">مازاد ${arr('isSurplus')}</th>
+        <th>عملیات</th>
+      </tr></thead>
+      <tbody>
+      ${paged.length?paged.map(a=>`<tr>
+        <td>${a.row||''}</td>
+        <td style="font-family:monospace;font-size:12px">${a.tag}</td>
+        <td style="font-family:monospace;font-size:11px">${a.code}</td>
+        <td style="font-weight:bold">${a.name}</td>
+        <td>${itemImages[a.id]?`<img src="${itemImages[a.id]}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #e0e8f0;cursor:pointer" onclick="showImgFull(${a.id})">`:'<span style="color:#ccc;font-size:16px">📷</span>'}</td>
+        <td><span class="badge ${a.type==='غیرمصرفی'?'badge-r':'badge-o'}">${a.type}</span></td>
+        <td style="font-size:12px;color:#666">${a.model||'—'}</td>
+        <td style="font-size:12px">${a.price?fmt(a.price):'—'}</td>
+        <td><span class="badge badge-b">${a.location}</span></td>
+        <td>${a.hasTag?'<span class="badge badge-g">✓ دارد</span>':'<span class="badge badge-r">✗ ندارد</span>'}</td>
+        <td>${a.isScrap?'<span class="badge badge-r">⚠️ بله</span>':'<span style="color:#aaa;font-size:12px">خیر</span>'}</td>
+        <td>${a.isSurplus?'<span class="badge badge-o">📦 بله</span>':'<span style="color:#aaa;font-size:12px">خیر</span>'}</td>
+        <td><div class="row-actions">
+          <button onclick="editAsset(${a.id})" title="ویرایش">✏️</button>
+          <button onclick="deleteAsset(${a.id})" style="color:#c62828" title="حذف">🗑️</button>
+        </div></td>
+      </tr>`).join(''):`<tr><td colspan="13" style="text-align:center;padding:24px;color:#aaa">موردی یافت نشد</td></tr>`}
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:11px;color:#999;text-align:left;margin-top:6px;padding:4px 8px">${filtered.length.toLocaleString('fa-IR')} مورد</div>`;
+  // search with focus preservation
+  const si=document.getElementById('asset-search');
+  if(si){
+    si.addEventListener('input',function(){
+      clearTimeout(window._ast);
+      const v=this.value, cp=this.selectionStart;
+      window._ast=setTimeout(()=>{
+        searchQ=v;currentPage=1;
+        renderAssets(document.getElementById('app'));
+        const ni=document.getElementById('asset-search');
+        if(ni){ni.focus();try{ni.setSelectionRange(cp,cp);}catch(e){}}
+      },250);
+    });
+  }
+}
+
+function showImgFull(id){
+  const src=itemImages[id];if(!src)return;
+  const bg=document.createElement('div');
+  bg.className='modal-bg';
+  bg.innerHTML=`<div style="background:#fff;border-radius:16px;padding:16px;max-width:500px;max-height:90vh;text-align:center">
+    <img src="${src}" style="max-width:100%;max-height:70vh;border-radius:10px;object-fit:contain">
+    <div style="margin-top:12px"><button onclick="this.closest('.modal-bg').remove()">✕ بستن</button></div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+}
+
+function printAssetsList(orient){
+  const filtered=getSorted(getFiltered());
+  const pc=printColumns;
+  const colDefs=[
+    {key:'row',label:'ردیف'},{key:'tag',label:'برچسب'},{key:'code',label:'کد مال'},
+    {key:'name',label:'عنوان مال'},{key:'type',label:'نوع'},{key:'model',label:'مدل'},
+    {key:'price',label:'قیمت (ریال)'},{key:'location',label:'مکان'},
+    {key:'hasTag',label:'برچسب فیزیکی'},{key:'isScrap',label:'اسقاطی'},
+    {key:'isSurplus',label:'مازاد'},{key:'notes',label:'ملاحظات'},
+  ];
+  const active=colDefs.filter(c=>pc[c.key]);
+  function cv(a,k){
+    if(k==='row')return a.row||'';
+    if(k==='tag')return a.tag;
+    if(k==='code')return a.code;
+    if(k==='name')return a.name;
+    if(k==='type')return a.type;
+    if(k==='model')return a.model||'';
+    if(k==='price')return a.price?a.price.toLocaleString():'';
+    if(k==='location')return a.location;
+    if(k==='hasTag')return a.hasTag?'دارد':'ندارد';
+    if(k==='isScrap')return a.isScrap?'بله':'';
+    if(k==='isSurplus')return a.isSurplus?'بله':'';
+    if(k==='notes')return a.notes||'';
+    return '';
+  }
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>فهرست اموال</title>
+  <style>
+    @page{size:A4 ${orient==='landscape'?'landscape':'portrait'}}
+    body{font-family:Tahoma;font-size:10px;direction:rtl;margin:10mm}
+    h2,h3{text-align:center;margin:4px 0}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border:1px solid #555;padding:4px 6px;text-align:right}
+    thead tr{background:#dce6f0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .sigs{display:flex;justify-content:space-around;margin-top:24px}
+    .sig{text-align:center}
+  </style></head>
+  <body>
+  <h2>${appSettings.schoolName}</h2>
+  <h3>فهرست اموال — تعداد: ${filtered.length} قلم | تاریخ: ${new Date().toLocaleDateString('fa-IR')}</h3>
+  <table><thead><tr>${active.map(c=>`<th>${c.label}</th>`).join('')}</tr></thead><tbody>
+  ${filtered.map(a=>`<tr>${active.map(c=>`<td>${cv(a,c.key)}</td>`).join('')}</tr>`).join('')}
+  </tbody></table>
+  <div class="sigs">
+    <div class="sig">${appSettings.sig1}<br><br>امضاء: ______________</div>
+    <div class="sig">${appSettings.sig2}<br><br>امضاء: ______________</div>
+    <div class="sig">${appSettings.sig3}<br><br>امضاء: ______________</div>
+  </div>
+  <script>window.onload=()=>window.print();<\/script></body></html>`);
+}
+
+// ===== ADD/EDIT =====
+function renderAdd(app){
+  const a=editingId?assets.find(x=>x.id===editingId):null;
+  const imgKey=a?a.id:null; // image keyed by asset ID
+  const unames=[...new Set(assets.map(x=>x.name))].sort((a,b)=>a.localeCompare(b,'fa',{sensitivity:'base'}));
+  app.innerHTML=`
+  <div class="form-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #f0f4f8">
+      <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#4361ee,#3a0ca3);display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">${a?'✏️':'➕'}</div>
+      <div><div style="font-size:16px;font-weight:bold;color:#1a3a5c">${a?'ویرایش مال':'افزودن مال جدید'}</div>
+      <div style="font-size:11px;color:#aaa;margin-top:2px">${appSettings.schoolName}</div></div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">📦 اطلاعات اصلی</div>
+      <div class="form-row"><label>🏷️ عنوان مال *</label>
+        <input type="text" id="f-name" value="${a?a.name:''}" placeholder="مثال: مانیتور، میز، صندلی..." list="nl">
+        <datalist id="nl">${unames.map(n=>`<option value="${n}">`).join('')}</datalist>
+      </div>
+      <div class="form-row"><label>⚙️ نوع مال *</label>
+        <select id="f-type">
+          <option value="غیرمصرفی" ${(!a||a.type==='غیرمصرفی')?'selected':''}>🔴 غیرمصرفی</option>
+          <option value="درحکم‌مصرفی" ${a&&a.type==='درحکم‌مصرفی'?'selected':''}>🟡 در حکم مصرفی</option>
+          <option value="مصرفی" ${a&&a.type==='مصرفی'?'selected':''}>🟢 مصرفی</option>
+          <option value="هردو" ${a&&a.type==='هردو'?'selected':''}>🔵 هر دو</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>🔢 کد مال</label><input type="text" id="f-code" value="${a?a.code:''}" placeholder="231040001"></div>
+        <div class="form-row"><label>🔧 مدل / ویژگی</label><input type="text" id="f-model" value="${a?a.model:''}" placeholder="مدل یا سازنده"></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">📍 مکان و قیمت</div>
+      <div class="form-grid">
+        <div class="form-row"><label>🏫 مکان نگهداری</label>
+          <select id="f-loc">${locations.map(l=>`<option value="${l}" ${a&&a.location===l?'selected':''}>${l}</option>`).join('')}</select>
+        </div>
+        <div class="form-row"><label>💰 قیمت (ریال)</label><input type="number" id="f-price" value="${a?a.price:''}" placeholder="قیمت به ریال"></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">🏷️ برچسب</div>
+      <div class="form-grid">
+        <div class="form-row"><label>وضعیت برچسب</label>
+          <select id="f-hastag">
+            <option value="yes" ${(!a||a.hasTag)?'selected':''}>✅ دارد</option>
+            <option value="no" ${a&&!a.hasTag?'selected':''}>❌ ندارد</option>
+          </select>
+        </div>
+        <div class="form-row"><label>🔖 شماره برچسب</label><input type="text" id="f-tag" value="${a?a.tag:''}" placeholder="شماره برچسب"></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">⚠️ وضعیت مال</div>
+      <div class="form-grid">
+        <div class="form-row"><label>⚠️ اسقاطی</label>
+          <select id="f-scrap">
+            <option value="no" ${(!a||!a.isScrap)?'selected':''}>خیر — سالم</option>
+            <option value="yes" ${a&&a.isScrap?'selected':''}>بله — اسقاطی</option>
+          </select>
+        </div>
+        <div class="form-row"><label>📦 مازاد</label>
+          <select id="f-surplus">
+            <option value="no" ${(!a||!a.isSurplus)?'selected':''}>خیر — در استفاده</option>
+            <option value="yes" ${a&&a.isSurplus?'selected':''}>بله — مازاد</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row"><label>📝 ملاحظات</label><textarea id="f-notes" placeholder="توضیحات اضافه...">${a?a.notes:''}</textarea></div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">🖼️ تصویر این کالا</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="img-preview" style="width:90px;height:90px;border-radius:10px;border:2px dashed #c8d8ff;background:#f7fafd;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0">
+          ${imgKey&&itemImages[imgKey]?`<img src="${itemImages[imgKey]}" style="width:100%;height:100%;object-fit:cover">`:'📷'}
+        </div>
+        <div style="flex:1">
+          ${a?`<div style="font-size:12px;color:#555;margin-bottom:6px">تصویر برای: <strong>${a.name}</strong> (برچسب: ${a.tag||'—'})<br><span style="color:#aaa;font-size:11px">این تصویر فقط برای همین قلم خاص است.</span></div>`
+          :'<div style="font-size:12px;color:#888;margin-bottom:6px">پس از ذخیره، می‌توانید از طریق ویرایش تصویر اضافه کنید.</div>'}
+          ${a?`<input type="file" id="f-image" accept="image/*" onchange="previewImg(this)" style="font-size:12px">
+          ${imgKey&&itemImages[imgKey]?`<button onclick="removeImg(${imgKey})" style="font-size:11px;padding:3px 8px;margin-top:6px;margin-right:6px;background:#ffeaea;border:1px solid #ffb3b3;color:#b71c1c">🗑️ حذف تصویر</button>`:''}`
+          :'<div style="font-size:11px;color:#bbb">ابتدا کالا را ذخیره کنید</div>'}
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button onclick="editingId=null;showTab('assets')" style="padding:10px 22px">❌ انصراف</button>
+      <button class="btn-blue" onclick="saveForm()" style="padding:10px 28px;font-size:14px">${a?'💾 ذخیره':'✅ افزودن'}</button>
+    </div>
+  </div>`;
+}
+
+function previewImg(input){
+  if(!input.files||!input.files[0])return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const p=document.getElementById('img-preview');
+    if(p)p.innerHTML=`<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+  };
+  r.readAsDataURL(input.files[0]);
+}
+function removeImg(id){
+  if(!confirm('تصویر این قلم حذف شود؟'))return;
+  delete itemImages[id];
+  saveAll();
+  renderAdd(document.getElementById('app'));
+}
+
+function saveForm(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){alert('عنوان مال الزامی است');return;}
+  const isScrap=document.getElementById('f-scrap').value==='yes';
+  const isSurplus=document.getElementById('f-surplus').value==='yes';
+  const obj={name,
+    type:document.getElementById('f-type').value,
+    code:document.getElementById('f-code').value.trim(),
+    model:document.getElementById('f-model').value.trim(),
+    location:document.getElementById('f-loc').value,
+    price:parseInt(document.getElementById('f-price').value)||0,
+    hasTag:document.getElementById('f-hastag').value==='yes',
+    tag:document.getElementById('f-tag').value.trim(),
+    notes:document.getElementById('f-notes').value.trim(),
+    isScrap,isSurplus};
+  const imgInput=document.getElementById('f-image');
+  if(imgInput&&imgInput.files&&imgInput.files[0]&&editingId){
+    const r=new FileReader();
+    r.onload=ev=>{itemImages[editingId]=ev.target.result;finishSave(obj);};
+    r.readAsDataURL(imgInput.files[0]);
+  } else {
+    finishSave(obj);
+  }
+}
+function finishSave(obj){
+  if(editingId){
+    const idx=assets.findIndex(a=>a.id===editingId);
+    if(idx>=0)assets[idx]={...assets[idx],...obj};
+    editingId=null;
+  }else{
+    const mid=assets.reduce((m,a)=>Math.max(m,a.id),0);
+    const mr=assets.reduce((m,a)=>Math.max(m,a.row||0),0);
+    assets.push({id:mid+1,row:mr+1,...obj});
+  }
+  saveAll();showTab('assets');
+}
+function editAsset(id){editingId=id;showTab('add');}
+function deleteAsset(id){
+  const a=assets.find(x=>x.id===id);
+  if(!a)return;
+  const confirmed=prompt(`⚠️ حذف کامل از سیستم\n\nنام کالا: ${a.name}\nبرچسب: ${a.tag||'—'}\nمکان: ${a.location||'بدون مکان'}\n\nاین عمل غیرقابل بازگشت است!\nبرای تأیید، عبارت «حذف» را تایپ کنید:`);
+  if(confirmed!=='حذف'){
+    if(confirmed!==null)alert('عملیات لغو شد. عبارت «حذف» را دقیقاً تایپ نکردید.');
+    return;
+  }
+  delete itemImages[id];
+  assets=assets.filter(x=>x.id!==id);
+  saveAll();
+  renderAssets(document.getElementById('app'));
+}
+
+// ===== LOCATIONS =====
+// icon mapping based on keywords in location name
+function locIcon(name){
+  const n=name;
+  if(/آزمایشگاه/.test(n))return'🔬';
+  if(/کتابخانه|کتاب/.test(n))return'📚';
+  if(/مدیر|ریاست/.test(n))return'🏢';
+  if(/انبار/.test(n))return'📦';
+  if(/سالن|ورزش/.test(n))return'🏋️';
+  if(/رایانه|کامپیوتر/.test(n))return'🖥️';
+  if(/نماز/.test(n))return'🕌';
+  if(/بهداشت|درمان/.test(n))return'🏥';
+  if(/هنر|نقاشی/.test(n))return'🎨';
+  if(/آشپز|آشپزخانه/.test(n))return'🍳';
+  if(/دفتر/.test(n))return'🗂️';
+  if(/کلاس|آموزش/.test(n))return'🏫';
+  if(/حیاط|فضای باز/.test(n))return'🌳';
+  if(/نگهبان|درب/.test(n))return'🚪';
+  if(/مشاور/.test(n))return'💬';
+  return'📍';
+}
+
+function renderLocations(app){
+  const byLoc={};assets.forEach(a=>{byLoc[a.location]=(byLoc[a.location]||0)+1;});
+  const unassigned=assets.filter(a=>!a.location||!locations.includes(a.location));
+  app.innerHTML=`
+  <div style="font-size:15px;font-weight:bold;color:#1a3a5c;margin-bottom:12px;padding-right:8px;border-right:4px solid #4361ee">🏫 مکان‌های نگهداری اموال</div>
+  <div style="background:#fff;border-radius:12px;padding:12px 16px;border:1px solid #e8eef6;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+    <button class="btn-blue" onclick="sortLocsAlpha()" style="font-size:12px">🔤 مرتب‌سازی الفبا</button>
+    <span style="color:#bbb;font-size:12px">|</span>
+    <span style="color:#999;font-size:12px">برای جابجایی از دکمه‌های ↑↓ در کنار هر کارت استفاده کنید</span>
+  </div>
+  <div class="loc-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px">
+    ${locations.map((l,i)=>`
+    <div style="background:#fff;border-radius:14px;border:2px solid #e8eef6;padding:18px 16px 14px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;transition:box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <div style="position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:2px">
+        <button onclick="moveLoc(${i},-1)" title="بالاتر" style="font-size:10px;padding:1px 6px;background:#f0f4ff;border:1px solid #c8d8ff;color:#4361ee;line-height:1.4" ${i===0?'disabled':''}>▲</button>
+        <button onclick="moveLoc(${i},1)" title="پایین‌تر" style="font-size:10px;padding:1px 6px;background:#f0f4ff;border:1px solid #c8d8ff;color:#4361ee;line-height:1.4" ${i===locations.length-1?'disabled':''}>▼</button>
+      </div>
+      <div style="font-size:38px;margin-bottom:8px;line-height:1">${locIcon(l)}</div>
+      <div style="font-weight:bold;font-size:14px;color:#1a3a5c;margin-bottom:4px">${l}</div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px"><span style="background:#f0f4ff;color:#4361ee;border-radius:20px;padding:2px 10px;font-weight:bold">${(byLoc[l]||0)}</span> قلم</div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:100%">
+        <button onclick="showLocDetail('${l.replace(/'/g,"\\\'")}')" style="font-size:11px;padding:5px;background:#e3edff;border:1px solid #b0c8ff;color:#1a3a8c;border-radius:7px;width:100%">👁️ مشاهده اموال</button>
+        <button onclick="showLocItemsManager('${l.replace(/'/g,"\\\'")}')" style="font-size:11px;padding:5px;background:#e0f7ee;border:1px solid #9fdac4;color:#1b7a4a;border-radius:7px;width:100%">📝 مدیریت اقلام</button>
+        <button onclick="removeLoc(${i})" style="font-size:11px;padding:5px;background:#ffeaea;border:1px solid #ffb3b3;color:#b71c1c;border-radius:7px;width:100%">🗑️ حذف مکان</button>
+      </div>
+    </div>`).join('')}
+  </div>
+  ${unassigned.length?`
+  <div style="background:#fff8e1;border-radius:12px;padding:14px 16px;border:2px solid #ffe082;margin-bottom:16px">
+    <div style="font-size:13px;font-weight:bold;color:#b45309;margin-bottom:10px">⚠️ اقلام بدون مکان (${unassigned.length} قلم)</div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#fff3cd">
+        <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #ffe082">برچسب</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #ffe082">عنوان</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #ffe082">نوع</th>
+        <th style="padding:6px 8px;text-align:right;border-bottom:2px solid #ffe082">عملیات</th>
+      </tr></thead>
+      <tbody>${unassigned.map(a=>`<tr>
+        <td style="padding:5px 8px;border-bottom:1px solid #ffe082;font-family:monospace">${a.tag||'—'}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid #ffe082;font-weight:bold">${a.name}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid #ffe082">${a.type}</td>
+        <td style="padding:5px 8px;border-bottom:1px solid #ffe082"><button onclick="editAsset(${a.id})" style="font-size:11px;padding:2px 8px;background:#fff3cd;border:1px solid #ffc107;color:#856404">✏️ ویرایش</button></td>
+      </tr>`).join('')}</tbody>
+    </table></div>
+  </div>`:''}
+  <div style="background:#fff;border-radius:12px;padding:16px;border:1px solid #e8eef6;max-width:420px">
+    <div style="font-size:13px;font-weight:bold;color:#1a3a5c;margin-bottom:10px">➕ افزودن مکان جدید</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="new-loc" placeholder="نام مکان جدید..." style="flex:1;padding:9px 12px;border-radius:8px;border:1.5px solid #e0e8f0;font-family:Tahoma;font-size:13px">
+      <button class="btn-blue" onclick="addLoc()">➕ افزودن</button>
+    </div>
+  </div>`;
+}
+
+function sortLocsAlpha(){
+  locations=[...locations].sort((a,b)=>a.localeCompare(b,'fa',{sensitivity:'base'}));
+  saveAll();renderLocations(document.getElementById('app'));
+}
+
+function moveLoc(i,dir){
+  const j=i+dir;
+  if(j<0||j>=locations.length)return;
+  [locations[i],locations[j]]=[locations[j],locations[i]];
+  saveAll();renderLocations(document.getElementById('app'));
+}
+
+function showLocItemsManager(loc){
+  _renderLocMgr(loc);
+}
+function _renderLocMgr(loc){
+  document.querySelector('.modal-bg')?.remove();
+  const existingItems=assets.filter(a=>a.location===loc).sort((a,b)=>a.name.localeCompare(b.name,'fa',{sensitivity:'base'}));
+  // all assets sorted by name
+  const allAssets=[...assets].sort((a,b)=>a.name.localeCompare(b.name,'fa',{sensitivity:'base'}));
+  const bg=document.createElement('div');
+  bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal" style="max-width:750px;max-height:92vh;overflow-y:auto;width:96%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f0f4f8;position:sticky;top:0;background:#fff;z-index:10;padding-top:4px">
+      <h3 style="margin:0;padding:0;border:none;font-size:15px">📝 مدیریت اقلام — <span style="color:#4361ee">${loc}</span></h3>
+      <button onclick="this.closest('.modal-bg').remove()" style="font-size:12px;padding:5px 14px;background:#f0f4f8;border:1px solid #ddd">✕ بستن</button>
+    </div>
+
+    <!-- ADD SECTION -->
+    <div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid #c8e0ff">
+      <div style="font-size:13px;font-weight:bold;color:#1a3a5c;margin-bottom:10px">➕ افزودن کالا به «${loc}»</div>
+      <div style="margin-bottom:8px">
+        <label style="font-size:11px;color:#555;display:block;margin-bottom:4px">🔍 انتخاب از کل لیست اموال (جستجو یا انتخاب):</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="loc-asset-search" placeholder="جستجو در نام کالا..." onkeyup="filterLocAssets()" style="flex:1;padding:8px 12px;border-radius:7px;border:1.5px solid #b0c8ff;font-family:Tahoma;font-size:13px">
+        </div>
+      </div>
+      <div id="loc-asset-list" style="max-height:200px;overflow-y:auto;border:1px solid #c8e0ff;border-radius:8px;background:#fff;margin-bottom:10px">
+        ${allAssets.length?allAssets.map(a=>`
+        <div class="loc-asset-row" data-name="${a.name}" data-id="${a.id}" data-loc="${a.location}"
+          style="padding:7px 12px;border-bottom:1px solid #eef2ff;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:12px"
+          onclick="selectLocAsset(${a.id},'${loc.replace(/'/g,"\\\'")}')"
+          onmouseover="this.style.background='#eef5ff'" onmouseout="this.style.background=''">
+          <span><strong>${a.name}</strong> <span style="color:#aaa;font-size:11px">${a.model?'('+a.model+')':''}</span></span>
+          <span style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:10px;background:${a.location===loc?'#c8f7e0':'#f0f4ff'};color:${a.location===loc?'#1b7a4a':'#4361ee'};padding:2px 8px;border-radius:20px">
+              ${a.location===loc?'✓ همین مکان':a.location}
+            </span>
+            <span style="font-family:monospace;font-size:10px;color:#aaa">${a.tag||''}</span>
+          </span>
+        </div>`).join(''):'<div style="padding:16px;text-align:center;color:#aaa">هیچ کالایی ثبت نشده</div>'}
+      </div>
+      <div style="background:#fffbf0;border-radius:8px;padding:10px;border:1px solid #ffe082;margin-bottom:10px">
+        <div style="font-size:11px;color:#b45309;margin-bottom:8px">➕ یا وارد کردن کالای جدید که در هیچ مکانی ثبت نشده:</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="loc-add-new-name" placeholder="نام کالای جدید..." style="flex:2;min-width:140px;padding:7px 10px;border-radius:7px;border:1.5px solid #ffe082;font-family:Tahoma;font-size:13px">
+          <select id="loc-add-type" style="flex:1;min-width:120px;padding:7px;border-radius:7px;border:1.5px solid #ffe082;font-family:Tahoma;font-size:13px">
+            <option value="غیرمصرفی">غیرمصرفی</option>
+            <option value="درحکم‌مصرفی">در حکم مصرفی</option>
+            <option value="مصرفی">مصرفی</option>
+          </select>
+          <input type="text" id="loc-add-tag" placeholder="برچسب..." style="flex:1;min-width:90px;padding:7px 10px;border-radius:7px;border:1.5px solid #ffe082;font-family:Tahoma;font-size:12px">
+          <button class="btn-orange" onclick="addNewItemToLoc('${loc.replace(/'/g,"\\\'")}')" style="white-space:nowrap">✅ افزودن جدید</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXISTING ITEMS -->
+    <div style="font-size:13px;font-weight:bold;color:#1a3a5c;margin-bottom:8px">📋 اقلام موجود در «${loc}» — <span style="background:#4361ee;color:#fff;border-radius:20px;padding:1px 10px;font-size:12px">${existingItems.length}</span> قلم</div>
+    <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:#f0f4ff">
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd;font-weight:bold">برچسب</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">عنوان</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">نوع</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">مدل</th>
+        <th style="padding:7px 8px;text-align:right;border-bottom:2px solid #ddd">عملیات</th>
+      </tr></thead>
+      <tbody>
+        ${existingItems.length?existingItems.map((a,i)=>`<tr style="${i%2?'background:#fafbfe':''}">
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;font-family:monospace">${a.tag||'—'}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;font-weight:bold">${a.name}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">${a.type}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0;color:#666">${a.model||'—'}</td>
+          <td style="padding:6px 8px;border-bottom:1px solid #f0f0f0">
+            <button onclick="removeItemFromLoc(${a.id},'${loc.replace(/'/g,"\\\'")}')" style="font-size:11px;padding:2px 8px;background:#ffeaea;border:1px solid #ffb3b3;color:#b71c1c">🗑️ حذف از مکان</button>
+          </td>
+        </tr>`).join(''):`<tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa">کالایی در این مکان ثبت نشده</td></tr>`}
+      </tbody>
+    </table>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
+}
+
+function filterLocAssets(){
+  const q=(document.getElementById('loc-asset-search').value||'').trim().toLowerCase();
+  document.querySelectorAll('.loc-asset-row').forEach(row=>{
+    const name=row.dataset.name||'';
+    row.style.display=(!q||name.toLowerCase().includes(q))?'flex':'none';
+  });
+}
+
+function selectLocAsset(assetId, toLoc){
+  const asset=assets.find(a=>a.id===assetId);
+  if(!asset)return;
+  if(asset.location===toLoc){
+    alert(`«${asset.name}» (برچسب: ${asset.tag||'—'}) در حال حاضر در همین مکان «${toLoc}» قرار دارد.`);
+    return;
+  }
+  if(asset.location&&locations.includes(asset.location)){
+    if(!confirm(`این کالا در مکان «${asset.location}» ثبت شده است.\n\nآیا از انتقال «${asset.name}» به «${toLoc}» اطمینان دارید؟\n\n✓ تأیید: از «${asset.location}» حذف و به «${toLoc}» اضافه می‌شود.`))return;
+  } else {
+    if(!confirm(`«${asset.name}» (برچسب: ${asset.tag||'—'}) به مکان «${toLoc}» اضافه شود؟`))return;
+  }
+  const idx=assets.findIndex(a=>a.id===assetId);
+  assets[idx].location=toLoc;
+  saveAll();
+  _renderLocMgr(toLoc);
+}
+
+function addNewItemToLoc(loc){
+  const name=document.getElementById('loc-add-new-name').value.trim();
+  if(!name){alert('لطفاً نام کالا را وارد کنید');return;}
+  // check if name already exists in any location
+  const existing=assets.filter(a=>a.name===name);
+  if(existing.length>0){
+    const locs=[...new Set(existing.map(a=>a.location))].join('، ');
+    if(!confirm(`کالایی با نام «${name}» قبلاً در مکان(های) «${locs}» ثبت شده است.\n\nآیا می‌خواهید یک قلم جدید با همین نام به «${loc}» اضافه شود؟`))return;
+  }
+  const type=document.getElementById('loc-add-type').value;
+  const tag=document.getElementById('loc-add-tag').value.trim();
+  const ref=existing[0];
+  const mid=assets.reduce((m,a)=>Math.max(m,a.id),0);
+  const mr=assets.reduce((m,a)=>Math.max(m,a.row||0),0);
+  assets.push({id:mid+1,row:mr+1,name,type,code:ref?ref.code:'',model:ref?ref.model:'',
+    location:loc,tag,price:ref?ref.price:0,hasTag:!!tag,notes:'',isScrap:false,isSurplus:false});
+  saveAll();
+  _renderLocMgr(loc);
+}
+
+function removeItemFromLoc(id,loc){
+  const a=assets.find(x=>x.id===id);
+  if(!a)return;
+  if(!confirm(`«${a.name}» (برچسب: ${a.tag||'—'}) از مکان «${loc}» حذف می‌شود و جزو اقلام بدون مکان خواهد شد.\n\nاز لیست اموال حذف نمی‌شود. ادامه می‌دهید؟`))return;
+  const idx=assets.findIndex(x=>x.id===id);
+  assets[idx].location='';
+  saveAll();
+  _renderLocMgr(loc);
+}
+
+function addLoc(){
+  const v=document.getElementById('new-loc').value.trim();
+  if(!v)return;
+  if(locations.includes(v)){alert('این مکان قبلاً وجود دارد');return;}
+  locations.push(v);saveAll();renderLocations(document.getElementById('app'));
+}
+function removeLoc(i){
+  if(assets.some(a=>a.location===locations[i])&&!confirm(`اموالی در "${locations[i]}" وجود دارد. حذف شود؟`))return;
+  locations.splice(i,1);saveAll();renderLocations(document.getElementById('app'));
+}
+
+
+function renderReport(app){
+  const filtered=getSorted(getFiltered());
+  const totalVal=filtered.reduce((s,a)=>s+(a.price||0),0);
+  const nonC=filtered.filter(a=>a.type==='غیرمصرفی').length;
+  const cons=filtered.filter(a=>a.type==='درحکم‌مصرفی').length;
+  const pc=printColumns;
+  const colDefs=[
+    {key:'row',label:'ردیف'},
+    {key:'tag',label:'شماره برچسب'},
+    {key:'code',label:'کد مال'},
+    {key:'name',label:'عنوان مال'},
+    {key:'type',label:'نوع'},
+    {key:'model',label:'مدل/ویژگی'},
+    {key:'price',label:'قیمت (ریال)'},
+    {key:'location',label:'مکان'},
+    {key:'hasTag',label:'برچسب'},
+    {key:'isScrap',label:'اسقاطی'},
+    {key:'isSurplus',label:'مازاد'},
+    {key:'notes',label:'ملاحظات'},
+  ];
+  const activeCols=colDefs.filter(c=>pc[c.key]);
+  function cellVal(a,key){
+    if(key==='row')return a.row||'';
+    if(key==='tag')return `<span style="font-family:monospace;font-size:11px">${a.tag}</span>`;
+    if(key==='code')return `<span style="font-family:monospace;font-size:11px">${a.code}</span>`;
+    if(key==='name')return `<strong>${a.name}</strong>`;
+    if(key==='type')return a.type;
+    if(key==='model')return `<span style="font-size:12px;color:#666">${a.model||'—'}</span>`;
+    if(key==='price')return `<span style="font-size:12px">${a.price?fmt(a.price):'—'}</span>`;
+    if(key==='location')return a.location;
+    if(key==='hasTag')return a.hasTag?'دارد':'ندارد';
+    if(key==='isScrap')return a.isScrap?'⚠️ بله':'—';
+    if(key==='isSurplus')return a.isSurplus?'📦 بله':'—';
+    if(key==='notes')return `<span style="font-size:11px;color:#888">${a.notes||''}</span>`;
+    return '';
+  }
+  app.innerHTML=`
+  <div class="report-header-print">
+    <div style="font-size:16px;font-weight:bold">📋 فهرست اموال غیرمصرفی و در حکم مصرفی</div>
+    <div style="font-size:12px;opacity:.85;margin-top:5px">${appSettings.schoolName} | مدیر: ${appSettings.principal} | ${appSettings.org} | تاریخ: ${today()}</div>
+  </div>
+  <div class="toolbar" id="no-print">
+    <input type="text" id="report-search" placeholder="🔍 جستجو در همه فیلدها..." value="${searchQ}">
+    <select onchange="filterType=this.value;renderReport(document.getElementById('app'))">
+      <option value="">همه نوع‌ها</option>
+      <option value="غیرمصرفی" ${filterType==='غیرمصرفی'?'selected':''}>غیرمصرفی</option>
+      <option value="درحکم‌مصرفی" ${filterType==='درحکم‌مصرفی'?'selected':''}>در حکم مصرفی</option>
+    </select>
+    <select onchange="filterLoc=this.value;renderReport(document.getElementById('app'))">
+      <option value="">همه مکان‌ها</option>
+      ${locations.map(l=>`<option value="${l}" ${filterLoc===l?'selected':''}>${l}</option>`).join('')}
+    </select>
+    <button class="btn-orange" onclick="showColSelector()">⚙️ انتخاب ستون‌ها</button>
+    <button class="btn-blue" onclick="window.print()">🖨️ چاپ</button>
+    <button class="btn-green" onclick="exportExcel()">📊 اکسل</button>
+    <button class="btn-orange" onclick="exportCSV()">📄 CSV</button>
+    <button class="btn-purple" onclick="backupData()">💾 بکاپ</button>
+    <button class="btn-teal" onclick="restoreData()">📂 بازیابی</button>
+  </div>
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px" id="no-print">
+    <div class="stat-card" style="background:linear-gradient(135deg,#4361ee,#3a0ca3)"><div class="num">${filtered.length.toLocaleString('fa-IR')}</div><div class="lbl">کل</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f72585,#b5179e)"><div class="num">${nonC.toLocaleString('fa-IR')}</div><div class="lbl">غیرمصرفی</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#f8961e,#f3722c)"><div class="num">${cons.toLocaleString('fa-IR')}</div><div class="lbl">در حکم مصرفی</div></div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#7209b7,#560bad)"><div class="num" style="font-size:16px">${Math.round(totalVal/1000000).toLocaleString('fa-IR')}M</div><div class="lbl">ارزش (ریال)</div></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>${activeCols.map(c=>`<th>${c.label}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${filtered.map(a=>`<tr>${activeCols.map(c=>`<td>${cellVal(a,c.key)}</td>`).join('')}</tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;justify-content:space-around;margin-top:28px;padding-top:16px;border-top:2px solid #eee;font-size:13px">
+    <div style="text-align:center"><div style="color:#666">تحویل‌گیرنده</div><div style="font-weight:bold;margin:6px 0;color:#1a3a5c">${appSettings.sig1}</div>امضاء: ______________</div>
+    <div style="text-align:center"><div style="color:#666">جمعدار اموال</div><div style="font-weight:bold;margin:6px 0;color:#1a3a5c">${appSettings.sig2}</div>امضاء: ______________</div>
+    <div style="text-align:center"><div style="color:#666">رئیس اداره</div><div style="font-weight:bold;margin:6px 0;color:#1a3a5c">${appSettings.sig3}</div>امضاء: ______________</div>
+  </div>`;
+  // fix search focus
+  const ri=document.getElementById('report-search');
+  if(ri){
+    ri.addEventListener('input',function(){
+      clearTimeout(window._rst);
+      const v=this.value, cp=this.selectionStart;
+      window._rst=setTimeout(()=>{
+        searchQ=v;
+        renderReport(document.getElementById('app'));
+        const ni=document.getElementById('report-search');
+        if(ni){ni.focus();try{ni.setSelectionRange(cp,cp);}catch(e){}}
+      },250);
+    });
+  }
+}
+
+function showColSelector(){
+  const colDefs=[
+    {key:'row',label:'ردیف'},
+    {key:'tag',label:'شماره برچسب'},
+    {key:'code',label:'کد مال'},
+    {key:'name',label:'عنوان مال'},
+    {key:'type',label:'نوع'},
+    {key:'model',label:'مدل/ویژگی'},
+    {key:'price',label:'قیمت (ریال)'},
+    {key:'location',label:'مکان'},
+    {key:'hasTag',label:'برچسب'},
+    {key:'isScrap',label:'اسقاطی'},
+    {key:'isSurplus',label:'مازاد'},
+    {key:'notes',label:'ملاحظات'},
+  ];
+  const bg=document.createElement('div');
+  bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal" style="max-width:420px">
+    <h3>⚙️ انتخاب ستون‌های نمایش و چاپ</h3>
+    <div style="font-size:12px;color:#888;margin-bottom:14px">ستون‌هایی که می‌خواهید در جدول گزارش و چاپ نمایش داده شوند را انتخاب کنید.</div>
+    ${colDefs.map(c=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .15s;${printColumns[c.key]?'background:#f0f7ff':''}">
+      <input type="checkbox" id="col-${c.key}" ${printColumns[c.key]?'checked':''} onchange="toggleCol('${c.key}',this.checked)" style="width:16px;height:16px">
+      <span style="font-size:13px">${c.label}</span>
+    </label>`).join('')}
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:2px solid #f0f4f8">
+      <button onclick="this.closest('.modal-bg').remove();renderReport(document.getElementById('app'))" class="btn-blue" style="padding:9px 22px">✅ اعمال و بستن</button>
+    </div>
+  </div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener('click',e=>{if(e.target===bg){bg.remove();renderReport(document.getElementById('app'));}});
+}
+
+function toggleCol(key,val){
+  printColumns[key]=val;
+  saveAll();
+  // update background of label
+  const lbl=document.querySelector(`#col-${key}`)?.closest('label');
+  if(lbl)lbl.style.background=val?'#f0f7ff':'';
+}
+
+
+// ===== SETTINGS =====
+function renderSettings(app){
+  app.innerHTML=`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px">
+    <div class="form-card">
+      <div style="font-size:15px;font-weight:bold;color:#1a3a5c;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #f0f4f8">🏫 اطلاعات مدرسه</div>
+      <div class="form-row"><label>نام مدرسه</label><input type="text" id="s-school" value="${appSettings.schoolName}"></div>
+      <div class="form-row"><label>نام مدیر</label><input type="text" id="s-principal" value="${appSettings.principal}"></div>
+      <div class="form-row"><label>نام جمعدار اموال</label><input type="text" id="s-keeper" value="${appSettings.keeper}"></div>
+      <div class="form-row"><label>نام سازمان</label><input type="text" id="s-org" value="${appSettings.org}"></div>
+    </div>
+    <div class="form-card">
+      <div style="font-size:15px;font-weight:bold;color:#1a3a5c;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #f0f4f8">✍️ امضاها</div>
+      <div class="form-row"><label>امضای اول (تحویل‌گیرنده)</label><input type="text" id="s-sig1" value="${appSettings.sig1}"></div>
+      <div class="form-row"><label>امضای دوم (جمعدار اموال)</label><input type="text" id="s-sig2" value="${appSettings.sig2}"></div>
+      <div class="form-row"><label>امضای سوم (رئیس اداره)</label><input type="text" id="s-sig3" value="${appSettings.sig3}"></div>
+      <div class="form-row" style="margin-top:16px;padding-top:12px;border-top:2px solid #f0f4f8">
+        <label>🔐 تغییر رمز عبور</label>
+        <input type="password" id="s-pwd" placeholder="رمز جدید (خالی = بدون تغییر)">
+      </div>
+      <div class="form-actions">
+        <button class="btn-blue" onclick="saveSettings()" style="padding:10px 24px">💾 ذخیره تنظیمات</button>
+      </div>
+    </div>
+  </div>`;
+}
+function saveSettings(){
+  appSettings.schoolName=document.getElementById('s-school').value.trim()||appSettings.schoolName;
+  appSettings.principal=document.getElementById('s-principal').value.trim()||appSettings.principal;
+  appSettings.keeper=document.getElementById('s-keeper').value.trim()||appSettings.keeper;
+  appSettings.org=document.getElementById('s-org').value.trim()||appSettings.org;
+  appSettings.sig1=document.getElementById('s-sig1').value.trim()||appSettings.sig1;
+  appSettings.sig2=document.getElementById('s-sig2').value.trim()||appSettings.sig2;
+  appSettings.sig3=document.getElementById('s-sig3').value.trim()||appSettings.sig3;
+  const np=document.getElementById('s-pwd').value;
+  if(np.trim())appSettings.password=np.trim();
+  saveAll();updateHeader();
+  alert('✅ تنظیمات ذخیره شد!');
+}
+
+// ===== EXPORT =====
+function exportCSV(){
+  const f=getFiltered();
+  const rows=[['ردیف','شماره برچسب','کد مال','عنوان مال','نوع','مدل','قیمت (ریال)','مکان','برچسب','ملاحظات']];
+  f.forEach(a=>rows.push([a.row||'',a.tag,a.code,a.name,a.type,a.model||'',a.price||'',a.location,a.hasTag?'دارد':'ندارد',a.notes||'']));
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  dlBlob(csv,'text/csv','اموال_نیاسری.csv');
+}
+function exportExcel(){
+  const f=getFiltered();
+  let t='<table border="1" style="direction:rtl"><thead><tr><th>ردیف</th><th>شماره برچسب</th><th>کد مال</th><th>عنوان مال</th><th>نوع</th><th>مدل</th><th>قیمت (ریال)</th><th>مکان</th><th>برچسب</th><th>اسقاطی</th><th>مازاد</th><th>ملاحظات</th></tr></thead><tbody>';
+  f.forEach(a=>{t+=`<tr><td>${a.row||''}</td><td>${a.tag}</td><td>${a.code}</td><td>${a.name}</td><td>${a.type}</td><td>${a.model||''}</td><td>${a.price||''}</td><td>${a.location}</td><td>${a.hasTag?'دارد':'ندارد'}</td><td>${a.notes||''}</td></tr>`;});
+  t+='</tbody></table>';
+  dlBlob('\uFEFF'+t,'application/vnd.ms-excel','اموال_نیاسری.xls');
+}
+function backupData(){
+  const d={assets,locations,settings:appSettings,exported:new Date().toISOString()};
+  dlBlob(JSON.stringify(d,null,2),'application/json','backup_niasari_'+today().replace(/\//g,'-')+'.json');
+  alert('✅ بکاپ دریافت شد!');
+}
+function restoreData(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const file=e.target.files[0];if(!file)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(d.assets&&Array.isArray(d.assets)){
+          assets=d.assets;
+          if(d.locations)locations=d.locations;
+          if(d.settings)appSettings=d.settings;
+          saveAll();updateHeader();
+          alert('✅ بازیابی موفق! تعداد: '+assets.length+' قلم');
+          showTab('dashboard');
+        }else{alert('فایل معتبر نیست');}
+      }catch{alert('خطا در خواندن فایل');}
+    };r.readAsText(file);
+  };inp.click();
+}
+function dlBlob(content,type,name){
+  const b=new Blob([content],{type});
+  const u=URL.createObjectURL(b);
+  const el=document.createElement('a');el.href=u;el.download=name;el.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+</script>
+</body>
+</html>
