@@ -683,8 +683,7 @@ function renderAssets(app){
       <option value="no" ${filterSurplus==='no'?'selected':''}>در استفاده</option>
     </select>
     <button class="btn-blue" onclick="editingId=null;showTab('add')">➕ افزودن</button>
-    <button onclick="printAssetsList('portrait')" style="background:#e3edff;border:1px solid #b0c8ff;color:#1a3a8c;font-size:12px">🖨️ چاپ عمودی</button>
-    <button onclick="printAssetsList('landscape')" style="background:#e0f7ee;border:1px solid #9fdac4;color:#1b7a4a;font-size:12px">🖨️ چاپ افقی</button>
+    <button onclick="printAssetsList()" style="background:#e3edff;border:1px solid #b0c8ff;color:#1a3a8c;font-size:12px">🖨️ چاپ</button>
   </div>
   <div style="font-size:12px;color:#666;margin-bottom:6px;padding-right:4px">${filtered.length.toLocaleString('fa-IR')} مورد یافت شد</div>
   <div class="table-wrap">
@@ -770,9 +769,95 @@ function showImgFull(id){
   bg.addEventListener('click',e=>{if(e.target===bg)bg.remove();});
 }
 
-function printAssetsList(orient){
-  const filtered=getSorted(getFiltered());
-  const pc=printColumns;
+// ===== PRINT SYSTEM =====
+let _cachedPrintRows = [];
+let _cachedPrintLoc  = '';
+
+function printAssetsList(){
+  // Step 1: snapshot everything RIGHT NOW
+  var snapLoc = filterLoc || '';
+  var snapRows = getSorted(assets.filter(function(a){
+    var q = searchQ.trim().toLowerCase();
+    var mq = !q||(
+      (a.name||'').toLowerCase().indexOf(q)>=0||
+      (a.tag||'').toLowerCase().indexOf(q)>=0||
+      (a.code||'').toLowerCase().indexOf(q)>=0||
+      (a.model||'').toLowerCase().indexOf(q)>=0||
+      (a.location||'').toLowerCase().indexOf(q)>=0||
+      (a.type||'').toLowerCase().indexOf(q)>=0||
+      (a.notes||'').toLowerCase().indexOf(q)>=0
+    );
+    var mt = !filterType    || a.type===filterType;
+    var ml = !filterLoc     || a.location===filterLoc;
+    var mh = !filterTag     || (filterTag==='yes'&&a.hasTag)||(filterTag==='no'&&!a.hasTag);
+    var ms = !filterScrap   || (filterScrap==='yes'&&a.isScrap)||(filterScrap==='no'&&!a.isScrap);
+    var mx = !filterSurplus || (filterSurplus==='yes'&&a.isSurplus)||(filterSurplus==='no'&&!a.isSurplus);
+    return mq&&mt&&ml&&mh&&ms&&mx;
+  }));
+  _cachedPrintRows = snapRows;
+  _cachedPrintLoc  = snapLoc;
+
+  // Step 2: build dialog HTML using string concat (not template literal) to avoid closure issues
+  var dlg = document.createElement('div');
+  dlg.className = 'modal-bg';
+  dlg.id = 'print-dialog-bg';
+  dlg.innerHTML =
+    '<div class="modal" style="max-width:500px;width:94%">'
+   +'<h3 style="margin-bottom:16px">🖨️ تنظیمات چاپ — '+snapRows.length+' قلم</h3>'
+   +'<div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:14px;border:1px solid #c8e0ff">'
+   +'<div style="font-size:12px;font-weight:bold;color:#1a3a5c;margin-bottom:10px">📄 عنوان برگه</div>'
+   +'<div style="display:flex;flex-direction:column;gap:8px">'
+   +'<div style="display:flex;align-items:center;gap:8px">'
+   +'<label style="font-size:12px;color:#555;width:90px;flex-shrink:0">عنوان مکان:</label>'
+   +'<input type="text" id="pr-loc" value="'+snapLoc+'" placeholder="مثال: آزمایشگاه، سالن..." style="flex:1;padding:7px 10px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:13px">'
+   +'</div>'
+   +'<div style="display:flex;align-items:center;gap:8px">'
+   +'<label style="font-size:12px;color:#555;width:90px;flex-shrink:0">توضیح اضافه:</label>'
+   +'<input type="text" id="pr-desc" placeholder="مثال: تحویل به معلم کلاس ۱۳..." style="flex:1;padding:7px 10px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:13px">'
+   +'</div>'
+   +'</div></div>'
+   +'<div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:14px;border:1px solid #c8e0ff">'
+   +'<div style="font-size:12px;font-weight:bold;color:#1a3a5c;margin-bottom:10px">✍️ امضاها — نام را خالی بگذارید تا فضا برای امضای دستی بماند</div>'
+   +'<div style="display:flex;flex-direction:column;gap:8px">'
+   +'<div style="display:flex;align-items:center;gap:6px">'
+   +'<label style="font-size:12px;color:#555;width:80px;flex-shrink:0">امضای اول:</label>'
+   +'<input type="text" id="pr-role1" value="تحویل‌گیرنده" style="flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:12px">'
+   +'<input type="text" id="pr-name1" value="'+appSettings.sig1+'" placeholder="نام (اختیاری)" style="flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:12px">'
+   +'</div>'
+   +'<div style="display:flex;align-items:center;gap:6px">'
+   +'<label style="font-size:12px;color:#555;width:80px;flex-shrink:0">امضای دوم:</label>'
+   +'<input type="text" id="pr-role2" value="جمعدار اموال" style="flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:12px">'
+   +'<input type="text" id="pr-name2" value="'+appSettings.sig2+'" placeholder="نام (اختیاری)" style="flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:12px">'
+   +'</div>'
+   +'<div style="display:flex;align-items:center;gap:6px">'
+   +'<label style="font-size:12px;color:#555;width:80px;flex-shrink:0">امضای سوم:</label>'
+   +'<input type="text" id="pr-role3" value="رئیس اداره" style="flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:12px">'
+   +'<input type="text" id="pr-name3" value="'+appSettings.sig3+'" placeholder="نام (اختیاری)" style="flex:1;padding:7px 8px;border-radius:7px;border:1.5px solid #c8e0ff;font-family:Tahoma;font-size:12px">'
+   +'</div>'
+   +'<div style="font-size:11px;color:#aaa;margin-top:8px">💡 نام را خالی بگذارید تا فضای خالی برای امضای دستی بماند</div>'
+   +'</div></div>'
+   +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+   +'<button onclick="document.getElementById(&quot;print-dialog-bg&quot;).remove()" style="padding:9px 18px">❌ انصراف</button>'
+   +'<button onclick="doPrint(&quot;portrait&quot;)" class="btn-blue" style="padding:9px 18px">🖨️ چاپ عمودی</button>'
+   +'<button onclick="doPrint(&quot;landscape&quot;)" class="btn-green" style="padding:9px 18px">🖨️ چاپ افقی</button>'
+   +'</div></div>';
+  document.body.appendChild(dlg);
+  dlg.addEventListener('click', function(e){ if(e.target===dlg) dlg.remove(); });
+}
+
+
+function doPrint(orient){
+  const rows   = _cachedPrintRows;
+  const prLoc  = (document.getElementById('pr-loc')?.value  ||'').trim();
+  const prDesc = (document.getElementById('pr-desc')?.value ||'').trim();
+  const role1  = (document.getElementById('pr-role1')?.value||'').trim();
+  const name1  = (document.getElementById('pr-name1')?.value||'').trim();
+  const role2  = (document.getElementById('pr-role2')?.value||'').trim();
+  const name2  = (document.getElementById('pr-name2')?.value||'').trim();
+  const role3  = (document.getElementById('pr-role3')?.value||'').trim();
+  const name3  = (document.getElementById('pr-name3')?.value||'').trim();
+
+  const pc = printColumns;
   const colDefs=[
     {key:'row',label:'ردیف'},{key:'tag',label:'برچسب'},{key:'code',label:'کد مال'},
     {key:'name',label:'عنوان مال'},{key:'type',label:'نوع'},{key:'model',label:'مدل'},
@@ -780,47 +865,73 @@ function printAssetsList(orient){
     {key:'hasTag',label:'برچسب فیزیکی'},{key:'isScrap',label:'اسقاطی'},
     {key:'isSurplus',label:'مازاد'},{key:'notes',label:'ملاحظات'},
   ];
-  const active=colDefs.filter(c=>pc[c.key]);
+  const active = colDefs.filter(c=>pc[c.key]);
   function cv(a,k){
-    if(k==='row')return a.row||'';
-    if(k==='tag')return a.tag;
-    if(k==='code')return a.code;
-    if(k==='name')return a.name;
-    if(k==='type')return a.type;
-    if(k==='model')return a.model||'';
-    if(k==='price')return a.price?a.price.toLocaleString():'';
-    if(k==='location')return a.location;
-    if(k==='hasTag')return a.hasTag?'دارد':'ندارد';
-    if(k==='isScrap')return a.isScrap?'بله':'';
-    if(k==='isSurplus')return a.isSurplus?'بله':'';
-    if(k==='notes')return a.notes||'';
+    if(k==='row')       return a.row||'';
+    if(k==='tag')       return a.tag||'';
+    if(k==='code')      return a.code||'';
+    if(k==='name')      return a.name||'';
+    if(k==='type')      return a.type||'';
+    if(k==='model')     return a.model||'';
+    if(k==='price')     return a.price ? Number(a.price).toLocaleString() : '';
+    if(k==='location')  return a.location||'';
+    if(k==='hasTag')    return a.hasTag?'دارد':'ندارد';
+    if(k==='isScrap')   return a.isScrap?'بله':'';
+    if(k==='isSurplus') return a.isSurplus?'بله':'';
+    if(k==='notes')     return a.notes||'';
     return '';
   }
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>فهرست اموال</title>
-  <style>
-    @page{size:A4 ${orient==='landscape'?'landscape':'portrait'}}
-    body{font-family:Tahoma;font-size:10px;direction:rtl;margin:10mm}
-    h2,h3{text-align:center;margin:4px 0}
-    table{width:100%;border-collapse:collapse;margin-top:8px}
-    th,td{border:1px solid #555;padding:4px 6px;text-align:right}
-    thead tr{background:#dce6f0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .sigs{display:flex;justify-content:space-around;margin-top:24px}
-    .sig{text-align:center}
-  </style></head>
-  <body>
-  <h2>${appSettings.schoolName}</h2>
-  <h3>فهرست اموال — تعداد: ${filtered.length} قلم | تاریخ: ${new Date().toLocaleDateString('fa-IR')}</h3>
-  <table><thead><tr>${active.map(c=>`<th>${c.label}</th>`).join('')}</tr></thead><tbody>
-  ${filtered.map(a=>`<tr>${active.map(c=>`<td>${cv(a,c.key)}</td>`).join('')}</tr>`).join('')}
-  </tbody></table>
-  <div class="sigs">
-    <div class="sig">${appSettings.sig1}<br><br>امضاء: ______________</div>
-    <div class="sig">${appSettings.sig2}<br><br>امضاء: ______________</div>
-    <div class="sig">${appSettings.sig3}<br><br>امضاء: ______________</div>
-  </div>
-  <script>window.onload=()=>window.print();<\/script></body></html>`);
+  function sigBlock(role,name){
+    return '<div class="sig">'
+      +'<div class="sig-role">'+(role||'')+'</div>'
+      +(name ? '<div class="sig-name">'+name+'</div>' : '<div style="height:24px"></div>')
+      +'<div class="sig-line">امضاء: ________________</div>'
+      +'</div>';
+  }
+
+  let tableRows = '';
+  for(let i=0;i<rows.length;i++){
+    const a=rows[i];
+    tableRows += '<tr>'+active.map(c=>'<td>'+cv(a,c.key)+'</td>').join('')+'</tr>';
+  }
+
+  const html = '<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8">'
+    +'<title>فهرست اموال'+(prLoc?' — '+prLoc:'')+'</title>'
+    +'<style>'
+    +'@page{size:A4 '+(orient==='landscape'?'landscape':'portrait')+';margin:12mm 10mm}'
+    +'*{box-sizing:border-box}'
+    +'body{font-family:Tahoma,Arial,sans-serif;font-size:10px;direction:rtl;margin:0}'
+    +'h2{text-align:center;margin:2px 0;font-size:14px}'
+    +'h3{text-align:center;margin:2px 0;font-size:12px;color:#1a3a5c}'
+    +'.desc{text-align:center;font-size:10px;color:#555;margin:2px 0}'
+    +'.meta{text-align:center;font-size:9px;color:#888;margin:4px 0 8px}'
+    +'table{width:100%;border-collapse:collapse;margin-top:6px}'
+    +'th,td{border:1px solid #777;padding:3px 5px;text-align:right;font-size:9px}'
+    +'thead tr{background:#dce6f0;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'.sigs{display:flex;justify-content:space-around;margin-top:36px;padding-top:14px;border-top:1px dashed #bbb}'
+    +'.sig{text-align:center;min-width:110px}'
+    +'.sig-role{font-weight:bold;font-size:10px;color:#333;margin-bottom:4px}'
+    +'.sig-name{font-size:11px;color:#1a3a5c;font-weight:bold;margin-bottom:10px}'
+    +'.sig-line{font-size:10px;color:#555;margin-top:6px}'
+    +'</style></head><body>'
+    +'<h2>'+appSettings.schoolName+'</h2>'
+    +(prLoc  ? '<h3>📍 مکان: '+prLoc+'</h3>' : '')
+    +(prDesc ? '<div class="desc">'+prDesc+'</div>' : '')
+    +'<div class="meta">تعداد: '+rows.length+' قلم &nbsp;|&nbsp; تاریخ: '+new Date().toLocaleDateString('fa-IR')+' &nbsp;|&nbsp; مدیر: '+appSettings.principal+'</div>'
+    +'<table><thead><tr>'+active.map(c=>'<th>'+c.label+'</th>').join('')+'</tr></thead>'
+    +'<tbody>'+tableRows+'</tbody></table>'
+    +'<div class="sigs">'+sigBlock(role1,name1)+sigBlock(role2,name2)+sigBlock(role3,name3)+'</div>'
+    +'<'+'script>window.onload=function(){window.print();}<'+'/script>'
+    +'</body></html>';
+
+  const w = window.open('','_blank');
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  document.getElementById('print-dialog-bg')?.remove();
+  _cachedPrintRows = [];
 }
+
 
 // ===== ADD/EDIT =====
 function renderAdd(app){
@@ -1388,9 +1499,9 @@ function saveSettings(){
   appSettings.principal=document.getElementById('s-principal').value.trim()||appSettings.principal;
   appSettings.keeper=document.getElementById('s-keeper').value.trim()||appSettings.keeper;
   appSettings.org=document.getElementById('s-org').value.trim()||appSettings.org;
-  appSettings.sig1=document.getElementById('s-sig1').value.trim()||appSettings.sig1;
-  appSettings.sig2=document.getElementById('s-sig2').value.trim()||appSettings.sig2;
-  appSettings.sig3=document.getElementById('s-sig3').value.trim()||appSettings.sig3;
+  appSettings.sig1=document.getElementById('s-sig1').value;
+  appSettings.sig2=document.getElementById('s-sig2').value;
+  appSettings.sig3=document.getElementById('s-sig3').value;
   const np=document.getElementById('s-pwd').value;
   if(np.trim())appSettings.password=np.trim();
   saveAll();updateHeader();
