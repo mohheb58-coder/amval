@@ -430,6 +430,7 @@ let loggedIn=false;
 let itemImages = JSON.parse(localStorage.getItem('niasari_images')||'{}');
 // images stored per asset ID: itemImages[assetId] = base64
 let printColumns = JSON.parse(localStorage.getItem('niasari_printcols')||'null') || {row:true,tag:true,code:true,name:true,type:true,model:true,price:false,location:true,hasTag:true,isScrap:true,isSurplus:true,notes:true};
+let tableColumns = JSON.parse(localStorage.getItem('niasari_tablecols')||'null') || {row:true,tag:true,code:true,name:true,img:true,type:true,model:true,price:true,location:true,hasTag:true,isScrap:true,isSurplus:true};
 
 function saveAll(){
   localStorage.setItem('niasari_assets',JSON.stringify(assets));
@@ -437,6 +438,7 @@ function saveAll(){
   localStorage.setItem('niasari_settings',JSON.stringify(appSettings));
   localStorage.setItem('niasari_images',JSON.stringify(itemImages));
   localStorage.setItem('niasari_printcols',JSON.stringify(printColumns));
+  localStorage.setItem('niasari_tablecols',JSON.stringify(tableColumns));
 }
 function fmt(n){return Number(n).toLocaleString('fa-IR');}
 function today(){return new Date().toLocaleDateString('fa-IR');}
@@ -637,7 +639,7 @@ function printLocDetail(loc){
     <div style="text-align:center">${appSettings.sig2}<br><br>امضاء: ________________</div>
     <div style="text-align:center">${appSettings.sig3}<br><br>امضاء: ________________</div>
   </div>
-  <script>window.onload=()=>window.print();<\/script></body></html>`);
+  <scr'+'ipt>window.onload=()=>window.print();<\/scr'+'ipt></body></html>`);
 }
 
 // ===== ASSETS =====
@@ -683,55 +685,56 @@ function renderAssets(app){
       <option value="no" ${filterSurplus==='no'?'selected':''}>در استفاده</option>
     </select>
     <button class="btn-blue" onclick="editingId=null;showTab('add')">➕ افزودن</button>
+    <button onclick="showTableColSelector()" style="background:#f0e6ff;border:1px solid #c8a0ff;color:#5b21b6;font-size:12px">⚙️ مدیریت ستون‌ها</button>
     <button onclick="printAssetsList()" style="background:#e3edff;border:1px solid #b0c8ff;color:#1a3a8c;font-size:12px">🖨️ چاپ</button>
   </div>
   <div style="font-size:12px;color:#666;margin-bottom:6px;padding-right:4px">${filtered.length.toLocaleString('fa-IR')} مورد یافت شد</div>
   <div class="table-wrap">
     <table id="assets-table">
       <colgroup>
-        <col style="width:40px">
-        <col style="width:80px">
-        <col style="width:70px">
-        <col style="width:14%">
-        <col style="width:44px">
-        <col style="width:80px">
-        <col style="width:10%">
-        <col style="width:80px">
-        <col style="width:10%">
-        <col style="width:50px">
-        <col style="width:50px">
-        <col style="width:50px">
-        <col style="width:70px">
+        ${tableColumns.row?'<col style="width:36px">':''}
+        ${tableColumns.tag?'<col style="width:78px">':''}
+        ${tableColumns.code?'<col style="width:68px">':''}
+        ${tableColumns.name?'<col style="width:15%">':''}
+        ${tableColumns.img?'<col style="width:44px">':''}
+        ${tableColumns.type?'<col style="width:78px">':''}
+        ${tableColumns.model?'<col style="width:10%">':''}
+        ${tableColumns.price?'<col style="width:78px">':''}
+        ${tableColumns.location?'<col style="width:10%">':''}
+        ${tableColumns.hasTag?'<col style="width:50px">':''}
+        ${tableColumns.isScrap?'<col style="width:50px">':''}
+        ${tableColumns.isSurplus?'<col style="width:50px">':''}
+        <col style="width:62px">
       </colgroup>
       <thead><tr>
-        <th onclick="assetSort('row')">ردیف ${arr('row')}</th>
-        <th onclick="assetSort('tag')">شماره برچسب ${arr('tag')}</th>
-        <th onclick="assetSort('code')">کد مال ${arr('code')}</th>
-        <th onclick="assetSort('name')">عنوان مال ${arr('name')}</th>
-        <th style="width:44px">تصویر</th>
-        <th onclick="assetSort('type')">نوع ${arr('type')}</th>
-        <th onclick="assetSort('model')">مدل/ویژگی ${arr('model')}</th>
-        <th onclick="assetSort('price')">قیمت (ریال) ${arr('price')}</th>
-        <th onclick="assetSort('location')">مکان ${arr('location')}</th>
-        <th onclick="assetSort('hasTag')">برچسب ${arr('hasTag')}</th>
-        <th onclick="assetSort('isScrap')">اسقاطی ${arr('isScrap')}</th>
-        <th onclick="assetSort('isSurplus')">مازاد ${arr('isSurplus')}</th>
+        ${tableColumns.row?`<th onclick="assetSort('row')">ردیف ${arr('row')}</th>`:''}
+        ${tableColumns.tag?`<th onclick="assetSort('tag')">برچسب ${arr('tag')}</th>`:''}
+        ${tableColumns.code?`<th onclick="assetSort('code')">کد مال ${arr('code')}</th>`:''}
+        ${tableColumns.name?`<th onclick="assetSort('name')">عنوان مال ${arr('name')}</th>`:''}
+        ${tableColumns.img?'<th>تصویر</th>':''}
+        ${tableColumns.type?`<th onclick="assetSort('type')">نوع ${arr('type')}</th>`:''}
+        ${tableColumns.model?`<th onclick="assetSort('model')">مدل ${arr('model')}</th>`:''}
+        ${tableColumns.price?`<th onclick="assetSort('price')">قیمت ${arr('price')}</th>`:''}
+        ${tableColumns.location?`<th onclick="assetSort('location')">مکان ${arr('location')}</th>`:''}
+        ${tableColumns.hasTag?`<th onclick="assetSort('hasTag')">برچسب ${arr('hasTag')}</th>`:''}
+        ${tableColumns.isScrap?`<th onclick="assetSort('isScrap')">اسقاطی ${arr('isScrap')}</th>`:''}
+        ${tableColumns.isSurplus?`<th onclick="assetSort('isSurplus')">مازاد ${arr('isSurplus')}</th>`:''}
         <th>عملیات</th>
       </tr></thead>
       <tbody>
       ${paged.length?paged.map(a=>`<tr>
-        <td>${a.row||''}</td>
-        <td style="font-family:monospace;font-size:12px">${a.tag}</td>
-        <td style="font-family:monospace;font-size:11px">${a.code}</td>
-        <td style="font-weight:bold">${a.name}</td>
-        <td>${itemImages[a.id]?`<img src="${itemImages[a.id]}" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #e0e8f0;cursor:pointer" onclick="showImgFull(${a.id})">`:'<span style="color:#ccc;font-size:16px">📷</span>'}</td>
-        <td><span class="badge ${a.type==='غیرمصرفی'?'badge-r':'badge-o'}">${a.type}</span></td>
-        <td style="font-size:12px;color:#666">${a.model||'—'}</td>
-        <td style="font-size:12px">${a.price?fmt(a.price):'—'}</td>
-        <td><span class="badge badge-b">${a.location}</span></td>
-        <td>${a.hasTag?'<span class="badge badge-g">✓ دارد</span>':'<span class="badge badge-r">✗ ندارد</span>'}</td>
-        <td>${a.isScrap?'<span class="badge badge-r">⚠️ بله</span>':'<span style="color:#aaa;font-size:12px">خیر</span>'}</td>
-        <td>${a.isSurplus?'<span class="badge badge-o">📦 بله</span>':'<span style="color:#aaa;font-size:12px">خیر</span>'}</td>
+        ${tableColumns.row?`<td>${a.row||''}</td>`:''}
+        ${tableColumns.tag?`<td style="font-family:monospace;font-size:11px">${a.tag||''}</td>`:''}
+        ${tableColumns.code?`<td style="font-family:monospace;font-size:11px">${a.code||''}</td>`:''}
+        ${tableColumns.name?`<td style="font-weight:bold">${a.name}</td>`:''}
+        ${tableColumns.img?`<td>${itemImages[a.id]?`<img src="${itemImages[a.id]}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid #e0e8f0;cursor:pointer" onclick="showImgFull(${a.id})">`:' <span style="color:#ccc;font-size:14px">📷</span>'}</td>`:''}
+        ${tableColumns.type?`<td><span class="badge ${a.type==='غیرمصرفی'?'badge-r':'badge-o'}">${a.type}</span></td>`:''}
+        ${tableColumns.model?`<td style="font-size:11px;color:#666">${a.model||'—'}</td>`:''}
+        ${tableColumns.price?`<td style="font-size:11px">${a.price?fmt(a.price):'—'}</td>`:''}
+        ${tableColumns.location?`<td><span class="badge badge-b">${a.location||''}</span></td>`:''}
+        ${tableColumns.hasTag?`<td>${a.hasTag?'<span class="badge badge-g">✓</span>':'<span class="badge badge-r">✗</span>'}</td>`:''}
+        ${tableColumns.isScrap?`<td style="text-align:center">${a.isScrap?'<span style="color:#c62828;font-size:11px;font-weight:bold">اسقاط</span>':'<span style="color:#ccc">—</span>'}</td>`:''}
+        ${tableColumns.isSurplus?`<td style="text-align:center">${a.isSurplus?'<span style="color:#e65100;font-size:11px;font-weight:bold">مازاد</span>':'<span style="color:#ccc">—</span>'}</td>`:''}
         <td><div class="row-actions">
           <button onclick="editAsset(${a.id})" title="ویرایش">✏️</button>
           <button onclick="deleteAsset(${a.id})" style="color:#c62828" title="حذف">🗑️</button>
@@ -1385,7 +1388,7 @@ function renderReport(app){
       ${locations.map(l=>`<option value="${l}" ${filterLoc===l?'selected':''}>${l}</option>`).join('')}
     </select>
     <button class="btn-orange" onclick="showColSelector()">⚙️ انتخاب ستون‌ها</button>
-    <button class="btn-blue" onclick="window.print()">🖨️ چاپ</button>
+    <button class="btn-blue" onclick="printAssetsList()">🖨️ چاپ</button>
     <button class="btn-green" onclick="exportExcel()">📊 اکسل</button>
     <button class="btn-orange" onclick="exportCSV()">📄 CSV</button>
     <button class="btn-purple" onclick="backupData()">💾 بکاپ</button>
@@ -1465,6 +1468,63 @@ function toggleCol(key,val){
   // update background of label
   const lbl=document.querySelector(`#col-${key}`)?.closest('label');
   if(lbl)lbl.style.background=val?'#f0f7ff':'';
+}
+
+function showTableColSelector(){
+  var cols=[
+    {key:'row',   label:'ردیف'},
+    {key:'tag',   label:'شماره برچسب'},
+    {key:'code',  label:'کد مال'},
+    {key:'name',  label:'عنوان مال'},
+    {key:'img',   label:'تصویر'},
+    {key:'type',  label:'نوع'},
+    {key:'model', label:'مدل/ویژگی'},
+    {key:'price', label:'قیمت'},
+    {key:'location', label:'مکان'},
+    {key:'hasTag',   label:'برچسب فیزیکی'},
+    {key:'isScrap',  label:'اسقاطی'},
+    {key:'isSurplus',label:'مازاد'},
+  ];
+  var bg=document.createElement('div');
+  bg.className='modal-bg';
+  var rows=cols.map(function(c){
+    var chk=tableColumns[c.key]?'checked':'';
+    var bg=tableColumns[c.key]?'#f0f7ff':'';
+    return '<label style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;cursor:pointer;background:'+bg+'">'
+      +'<input type="checkbox" data-tblcol="'+c.key+'" '+chk+' onchange="toggleTableCol(\'' +c.key+ '\',this.checked)" style="width:15px;height:15px">'
+      +'<span style="font-size:13px">'+c.label+'</span></label>';
+  }).join('');
+  bg.innerHTML='<div class="modal" style="max-width:360px">'
+    +'<h3 style="margin-bottom:14px">⚙️ مدیریت ستون‌های جدول</h3>'
+    +'<div style="font-size:11px;color:#888;margin-bottom:12px">ستون‌هایی که می‌خواهید نمایش داده شوند را انتخاب کنید.</div>'
+    +'<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:16px">'+rows+'</div>'
+    +'<div style="display:flex;gap:8px;justify-content:space-between">'
+    +'<button onclick="selectAllTableCols(true)" style="font-size:12px;padding:7px 12px;background:#e0f7ee;border:1px solid #9fdac4;color:#1b7a4a">✅ همه</button>'
+    +'<button onclick="selectAllTableCols(false)" style="font-size:12px;padding:7px 12px;background:#ffeaea;border:1px solid #ffb3b3;color:#b71c1c">❌ هیچ‌کدام</button>'
+    +'<button onclick="closeTblColDlg()" class="btn-blue" style="padding:7px 18px">✔ اعمال</button>'
+    +'</div></div>';
+  document.body.appendChild(bg);
+  bg.addEventListener('click',function(e){if(e.target===bg){bg.remove();renderAssets(document.getElementById('app'));}});
+}
+
+function closeTblColDlg(){
+  var d=document.querySelector('.modal-bg');if(d)d.remove();
+  renderAssets(document.getElementById('app'));
+}
+function toggleTableCol(key,val){
+  tableColumns[key]=val;
+  saveAll();
+  var lbl=document.querySelector('[data-tblcol="'+key+'"]');
+  if(lbl)lbl.closest('label').style.background=val?'#f0f7ff':'';
+}
+
+function selectAllTableCols(val){
+  Object.keys(tableColumns).forEach(function(k){tableColumns[k]=val;});
+  saveAll();
+  document.querySelectorAll('[data-tblcol]').forEach(function(cb){
+    cb.checked=val;
+    cb.closest('label').style.background=val?'#f0f7ff':'';
+  });
 }
 
 
